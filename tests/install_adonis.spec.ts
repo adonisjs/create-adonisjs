@@ -64,7 +64,6 @@ test.group('Install Adonis', (group) => {
 
       process.env.npm_config_user_agent = undefined
     })
-    .disableTimeout()
 
   test('initialize git repo', async ({ assert, fs }) => {
     const command = await kernel.create(InstallAdonis, [join(fs.basePath, 'foo')])

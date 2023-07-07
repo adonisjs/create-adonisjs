@@ -3,37 +3,61 @@ on:
   - push
   - pull_request
 jobs:
-  linux:
+  # Note : i didn't inherited from the org workflow since we need to install pnpm in this
+  # workflow. we may need to add a new input to the org workflow to enable/disable pnpm
+  # installation
+
+  test_linux:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version:
-          - 18.x
-          - 19.x
+        node-version: [18.16.0, 20.x]
+
     steps:
-      - uses: actions/checkout@v2
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: Install
-        run: npm install
-      - name: Run tests
-        run: npm test
-  windows:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Install pnpm
+      run: npm install -g pnpm
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run tests
+      run: npm test
+
+  test_windows:
+    if: ${{ !inputs.disable-windows }}
     runs-on: windows-latest
     strategy:
       matrix:
-        node-version:
-          - 18.x
-          - 19.x
+        node-version: [18.16.0, 20.x]
+
     steps:
-      - uses: actions/checkout@v2
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: Install
-        run: npm install
-      - name: Run tests
-        run: npm test
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Install pnpm
+      run: npm install -g pnpm
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run tests
+      run: npm test
+
+  lint:
+    uses: adonisjs/.github/.github/workflows/lint.yml@main
+
+  typecheck:
+    uses: adonisjs/.github/.github/workflows/typecheck.yml@main

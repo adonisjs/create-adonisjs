@@ -9,7 +9,6 @@
   "type": "module",
   "files": [
     "build/bin",
-    "build/templates",
     "build/src",
     "build/index.d.ts",
     "build/index.js"

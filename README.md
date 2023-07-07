@@ -1,5 +1,8 @@
 # create-adonisjs
 
+![image](https://github.com/adonisjs/create-adonisjs/assets/8337858/97c07232-dd6b-415b-88e7-571941da21e3)
+
+
 <br />
 
 [![gh-workflow-image]][gh-workflow-url] [![npm-image]][npm-url] ![][typescript-image] [![license-image]][license-url] [![snyk-image]][snyk-url]

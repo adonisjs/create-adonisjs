@@ -1,7 +1,7 @@
 {
   "name": "create-adonisjs",
   "description": "Scaffolding tool to create AdonisJS 6 projects",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "engines": {
     "node": ">=18.16.0"
   },

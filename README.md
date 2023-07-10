@@ -72,6 +72,14 @@ If you are using a custom starter kit hosted on a private repository, then you c
 npm init adonisjs -- -K="github:github_user/repo" -t="github_token"
 ```
 
+### `--package-manager`
+
+We are trying to detect the package manager used by your project. However, if you want to force a specific package manager, then you can pass it as follows:
+
+```sh
+npm init adonisjs -- --package-manager="yarn"
+```
+
 ### Other options
 
 | Option | Description |

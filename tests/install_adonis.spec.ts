@@ -79,6 +79,19 @@ test.group('Install Adonis', (group) => {
     await assert.dirExists('foo/.git')
   })
 
+  test('force package manager', async ({ assert, fs }) => {
+    const command = await kernel.create(InstallAdonis, [join(fs.basePath, 'foo')])
+
+    command.kit = 'github:samuelmarina/is-even'
+    command.packageManager = 'yarn'
+    command.skipGitInit = true
+    command.prompt.trap('Do you want to install dependencies?').replyWith(true)
+
+    await command.exec()
+
+    await assert.fileExists('foo/yarn.lock')
+  })
+
   test('valid adonis installation - todo when starter kits are public')
   test('copy .env - todo when starter kits are public')
   test('generate app key - todo when done')

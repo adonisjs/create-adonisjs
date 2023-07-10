@@ -60,9 +60,10 @@ export class InstallAdonis extends BaseCommand {
   declare skipGitInit: boolean
 
   /**
-   * The detected package manager ( based on agent )
+   * Package manager to use
    */
-  #detectedPkgManager!: string
+  @flags.string({ description: 'Force a package manager to be used', name: 'package-manager' })
+  declare packageManager: string
 
   /**
    * Whether or not dependencies were installed
@@ -131,22 +132,19 @@ export class InstallAdonis extends BaseCommand {
   async #installDependencies() {
     if (this.skipInstall) return
 
-    const pkgManager = this.#detectedPkgManager
-
     this.#hasInstalledDependencies = await this.prompt.confirm(
       'Do you want to install dependencies?',
-      {
-        hint: pkgManager + ' will be used',
-        default: true,
-      }
+      { hint: this.packageManager + ' will be used', default: true }
     )
 
     if (!this.#hasInstalledDependencies) return
 
-    const spinner = this.logger.await(`Installing dependencies using ${pkgManager}`).start()
+    const spinner = this.logger
+      .await(`Installing dependencies using ${this.packageManager}`)
+      .start()
 
     try {
-      await execa(pkgManager, ['install'], { cwd: this.destination })
+      await execa(this.packageManager, ['install'], { cwd: this.destination })
       spinner.update('Dependencies installed successfully').stop()
     } catch (error) {
       spinner.stop()
@@ -186,7 +184,7 @@ export class InstallAdonis extends BaseCommand {
       .sticker()
       .heading('Your AdonisJS project was created successfully !')
       .add(`1. ${this.colors.magenta('cd ' + relative(cwd(), this.destination))}`)
-      .add(`2. ${this.colors.magenta(`${this.#detectedPkgManager} run dev`)}`)
+      .add(`2. ${this.colors.magenta(`${this.packageManager} run dev`)}`)
       .add(`3. ${this.colors.magenta('Visit http://localhost:3333')}`)
       .add('')
       .add(`Have any questions?`)
@@ -250,7 +248,9 @@ export class InstallAdonis extends BaseCommand {
    * Main method
    */
   async run() {
-    this.#detectedPkgManager = detectPackageManager()?.name || 'npm'
+    if (!this.packageManager) {
+      this.packageManager = detectPackageManager()?.name || 'npm'
+    }
 
     this.#printTitle()
 

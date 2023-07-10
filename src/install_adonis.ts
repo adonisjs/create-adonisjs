@@ -108,8 +108,6 @@ export class InstallAdonis extends BaseCommand {
    * Prompt and download the selected template
    */
   async #downloadTemplate() {
-    this.logger.log('')
-
     let templateSource = this.kit
     if (!templateSource) {
       const template = await this.prompt.choice('Which template do you want to use?', templates)
@@ -133,7 +131,6 @@ export class InstallAdonis extends BaseCommand {
   async #installDependencies() {
     if (this.skipInstall) return
 
-    this.logger.log('')
     const pkgManager = this.#detectedPkgManager
 
     this.#hasInstalledDependencies = await this.prompt.confirm(
@@ -163,8 +160,6 @@ export class InstallAdonis extends BaseCommand {
    */
   async #initGitRepo() {
     if (this.skipGitInit) return
-
-    this.logger.log('')
 
     const shouldInit = await this.prompt.confirm('Do you want to initialize a git repository?', {
       default: true,
@@ -200,8 +195,6 @@ export class InstallAdonis extends BaseCommand {
         )}`
       )
       .render()
-
-    this.logger.log('')
   }
 
   /**

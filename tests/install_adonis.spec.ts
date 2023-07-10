@@ -2,6 +2,7 @@ import { test } from '@japa/runner'
 import { kernel } from '../index.js'
 import { InstallAdonis } from '../src/install_adonis.js'
 import { join } from 'node:path'
+import { execa } from 'execa'
 
 test.group('Install Adonis', (group) => {
   group.each.setup(() => {
@@ -92,7 +93,41 @@ test.group('Install Adonis', (group) => {
     await assert.fileExists('foo/yarn.lock')
   })
 
-  test('valid adonis installation - todo when starter kits are public')
-  test('copy .env - todo when starter kits are public')
+  test('valid adonis installation - todo when starter kits are public', async ({ assert, fs }) => {
+    const command = await kernel.create(InstallAdonis, [join(fs.basePath, 'foo')])
+
+    command.kit = 'github:adonisjs/web-starter-kit'
+
+    command.packageManager = 'pnpm'
+
+    command.prompt.trap('Do you want to install dependencies?').replyWith(true)
+    command.prompt.trap('Do you want to initialize a git repository?').replyWith(true)
+
+    await command.exec()
+
+    const result = await execa('node', ['ace', '--help'], { cwd: join(fs.basePath, 'foo') })
+
+    assert.deepEqual(result.exitCode, 0)
+    assert.deepInclude(result.stdout, 'View list of available commands')
+  })
+    .disableTimeout()
+    .skip(!!process.env.CI, 'Needs to make web-starter-kit repo public')
+
+  test('copy .env', async ({ assert, fs }) => {
+    const command = await kernel.create(InstallAdonis, [join(fs.basePath, 'foo')])
+
+    command.kit = 'github:adonisjs/web-starter-kit'
+
+    command.packageManager = 'pnpm'
+
+    command.prompt.trap('Do you want to install dependencies?').replyWith(true)
+    command.prompt.trap('Do you want to initialize a git repository?').replyWith(true)
+
+    await command.exec()
+    await assert.fileExists('foo/.env')
+  })
+    .disableTimeout()
+    .skip(!!process.env.CI, 'Needs to make web-starter-kit repo public')
+
   test('generate app key - todo when done')
 })

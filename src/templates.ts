@@ -12,6 +12,11 @@
  */
 export const templates = [
   {
+    name: 'Slim Starter Kit',
+    hint: 'Smallest possible AdonisJS application with just the core and Japa',
+    source: 'github:adonisjs/slim-starter-kit',
+  },
+  {
     name: 'Web Starter Kit',
     hint: 'for building web applications',
     source: 'github:adonisjs/web-starter-kit',

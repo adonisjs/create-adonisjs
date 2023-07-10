@@ -189,11 +189,8 @@ export class InstallAdonis extends BaseCommand {
       .add(`2. ${this.colors.magenta(`${this.#detectedPkgManager} run dev`)}`)
       .add(`3. ${this.colors.magenta('Visit http://localhost:3333')}`)
       .add('')
-      .add(
-        `Have any questions? Join our Discord server: ${this.colors.magenta(
-          'https://discord.gg/vDcEjq6'
-        )}`
-      )
+      .add(`Have any questions?`)
+      .add(`Join our Discord server: ${this.colors.magenta('https://discord.gg/vDcEjq6')}`)
       .render()
   }
 

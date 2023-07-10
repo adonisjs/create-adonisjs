@@ -21,7 +21,7 @@ import { execa } from 'execa'
 import { templates } from './templates.js'
 
 export class InstallAdonis extends BaseCommand {
-  static commandName = 'install-adonisjs'
+  static commandName = 'create-adonisjs'
   static description = 'Install AdonisJS'
 
   /**

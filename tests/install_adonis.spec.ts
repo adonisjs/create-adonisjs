@@ -1,10 +1,21 @@
-import { test } from '@japa/runner'
-import { kernel } from '../index.js'
-import { InstallAdonis } from '../src/install_adonis.js'
-import { join } from 'node:path'
-import { execa } from 'execa'
+/*
+ * create-adonisjs
+ *
+ * (c) AdonisJS
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
-test.group('Install Adonis', (group) => {
+import { execa } from 'execa'
+import { join } from 'node:path'
+import { test } from '@japa/runner'
+import { pathToFileURL } from 'node:url'
+
+import { kernel } from '../index.js'
+import { CreateNewApp } from '../commands/main.js'
+
+test.group('Create new app', (group) => {
   group.each.setup(() => {
     kernel.ui.switchMode('raw')
     return () => {
@@ -12,8 +23,8 @@ test.group('Install Adonis', (group) => {
     }
   })
 
-  test('Clone template to correct destination', async ({ assert, fs }) => {
-    const command = await kernel.create(InstallAdonis, [join(fs.basePath, 'foo')])
+  test('clone template to destination', async ({ assert, fs }) => {
+    const command = await kernel.create(CreateNewApp, [join(fs.basePath, 'foo')])
 
     command.kit = 'github:samuelmarina/is-even'
     command.skipInstall = true
@@ -25,10 +36,23 @@ test.group('Install Adonis', (group) => {
     await assert.fileExists('foo/package.json')
   })
 
+  test('prompt for destination when not provided', async ({ assert }) => {
+    const command = await kernel.create(CreateNewApp, [])
+
+    command.kit = 'github:samuelmarina/is-even'
+    command.skipInstall = true
+    command.skipGitInit = true
+    command.prompt.trap('Where should we create the project?').replyWith('tmp/foo')
+    await command.exec()
+
+    await assert.dirIsNotEmpty('foo')
+    await assert.fileExists('foo/package.json')
+  })
+
   test('fail if destination directory already exists', async ({ assert, fs }) => {
     await fs.create('foo/bar.txt', '')
 
-    const command = await kernel.create(InstallAdonis, [join(fs.basePath, 'foo')])
+    const command = await kernel.create(CreateNewApp, [join(fs.basePath, 'foo')])
 
     command.kit = 'github:samuelmarina/is-even'
     command.skipInstall = true
@@ -52,7 +76,7 @@ test.group('Install Adonis', (group) => {
     .run(async ({ assert, fs }, { agent, lockFile }) => {
       process.env.npm_config_user_agent = agent
 
-      const command = await kernel.create(InstallAdonis, [join(fs.basePath, 'foo')])
+      const command = await kernel.create(CreateNewApp, [join(fs.basePath, 'foo')])
 
       command.prompt.trap('Do you want to install dependencies?').replyWith(true)
 
@@ -66,8 +90,21 @@ test.group('Install Adonis', (group) => {
       process.env.npm_config_user_agent = undefined
     })
 
+  test('do not install dependencies', async ({ assert, fs }) => {
+    const command = await kernel.create(CreateNewApp, [join(fs.basePath, 'foo')])
+
+    command.kit = 'github:samuelmarina/is-even'
+    command.packageManager = 'npm'
+    command.skipInstall = true
+    command.skipGitInit = true
+
+    await command.exec()
+
+    await assert.fileNotExists(`foo/package-lock.json`)
+  })
+
   test('initialize git repo', async ({ assert, fs }) => {
-    const command = await kernel.create(InstallAdonis, [join(fs.basePath, 'foo')])
+    const command = await kernel.create(CreateNewApp, [join(fs.basePath, 'foo')])
 
     command.prompt.trap('Do you want to initialize a git repository?').replyWith(true)
 
@@ -80,8 +117,22 @@ test.group('Install Adonis', (group) => {
     await assert.dirExists('foo/.git')
   })
 
+  test('do not initialize git repo', async ({ assert, fs }) => {
+    const command = await kernel.create(CreateNewApp, [join(fs.basePath, 'foo')])
+
+    command.prompt.trap('Do you want to initialize a git repository?').replyWith(true)
+
+    command.kit = 'github:samuelmarina/is-even'
+    command.skipInstall = true
+    command.skipGitInit = true
+
+    await command.exec()
+
+    await assert.dirNotExists('foo/.git')
+  })
+
   test('force package manager', async ({ assert, fs }) => {
-    const command = await kernel.create(InstallAdonis, [join(fs.basePath, 'foo')])
+    const command = await kernel.create(CreateNewApp, [join(fs.basePath, 'foo')])
 
     command.kit = 'github:samuelmarina/is-even'
     command.packageManager = 'yarn'
@@ -93,12 +144,11 @@ test.group('Install Adonis', (group) => {
     await assert.fileExists('foo/yarn.lock')
   })
 
-  test('valid adonis installation - todo when starter kits are public', async ({ assert, fs }) => {
-    const command = await kernel.create(InstallAdonis, [join(fs.basePath, 'foo')])
+  test('configure slim starter kit', async ({ assert, fs }) => {
+    const command = await kernel.create(CreateNewApp, [join(fs.basePath, 'foo')])
 
-    command.kit = 'github:adonisjs/web-starter-kit'
-
-    command.packageManager = 'pnpm'
+    command.kit = 'github:adonisjs/slim-starter-kit'
+    command.packageManager = 'npm'
 
     command.prompt.trap('Do you want to install dependencies?').replyWith(true)
     command.prompt.trap('Do you want to initialize a git repository?').replyWith(true)
@@ -109,25 +159,48 @@ test.group('Install Adonis', (group) => {
 
     assert.deepEqual(result.exitCode, 0)
     assert.deepInclude(result.stdout, 'View list of available commands')
-  })
-    .disableTimeout()
-    .skip(!!process.env.CI, 'Needs to make web-starter-kit repo public')
+  }).disableTimeout()
+
+  test('prompt for kit selection when not pre-defined', async ({ assert, fs }) => {
+    const command = await kernel.create(CreateNewApp, [join(fs.basePath, 'foo')])
+
+    command.packageManager = 'npm'
+
+    command.prompt.trap('Select the template you want to use').chooseOption(0)
+    command.prompt.trap('Do you want to install dependencies?').replyWith(true)
+    command.prompt.trap('Do you want to initialize a git repository?').replyWith(true)
+
+    await command.exec()
+
+    const result = await execa('node', ['ace', '--help'], { cwd: join(fs.basePath, 'foo') })
+
+    assert.deepEqual(result.exitCode, 0)
+    assert.deepInclude(result.stdout, 'View list of available commands')
+  }).disableTimeout()
 
   test('copy .env', async ({ assert, fs }) => {
-    const command = await kernel.create(InstallAdonis, [join(fs.basePath, 'foo')])
+    const command = await kernel.create(CreateNewApp, [join(fs.basePath, 'foo')])
 
-    command.kit = 'github:adonisjs/web-starter-kit'
-
-    command.packageManager = 'pnpm'
+    command.kit = 'github:adonisjs/slim-starter-kit'
+    command.packageManager = 'npm'
 
     command.prompt.trap('Do you want to install dependencies?').replyWith(true)
     command.prompt.trap('Do you want to initialize a git repository?').replyWith(true)
 
     await command.exec()
     await assert.fileExists('foo/.env')
-  })
-    .disableTimeout()
-    .skip(!!process.env.CI, 'Needs to make web-starter-kit repo public')
+  }).disableTimeout()
 
-  test('generate app key - todo when done')
+  test('remove README file', async ({ assert, fs }) => {
+    const command = await kernel.create(CreateNewApp, [join(fs.basePath, 'foo')])
+
+    command.kit = 'github:adonisjs/slim-starter-kit'
+    command.packageManager = 'npm'
+
+    command.prompt.trap('Do you want to install dependencies?').replyWith(true)
+    command.prompt.trap('Do you want to initialize a git repository?').replyWith(true)
+
+    await command.exec()
+    await assert.fileNotExists('foo/README.md')
+  }).disableTimeout()
 })

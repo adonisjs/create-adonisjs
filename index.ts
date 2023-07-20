@@ -8,9 +8,9 @@
  */
 
 import { HelpCommand, Kernel } from '@adonisjs/ace'
-import { InstallAdonis } from './src/install_adonis.js'
+import { CreateNewApp } from './commands/main.js'
 
-Kernel.defaultCommand = InstallAdonis
+Kernel.defaultCommand = CreateNewApp
 
 export const kernel = Kernel.create()
 

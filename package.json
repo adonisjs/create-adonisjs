@@ -12,7 +12,7 @@
     "build/index.js"
   ],
   "bin": {
-    "create-adonisjs": "./build/bin/run.js"
+    "create-adonisjs": "build/bin/run.js"
   },
   "exports": {
     ".": "./build/index.js"
@@ -67,6 +67,17 @@
     "adonisjs",
     "create-adonisjs-app"
   ],
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adonisjs/create-adonisjs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/adonisjs/create-adonisjs/issues"
+  },
+  "homepage": "https://github.com/adonisjs/create-adonisjs#readme",
   "eslintConfig": {
     "extends": "@adonisjs/eslint-config/package"
   },

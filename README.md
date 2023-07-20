@@ -3,8 +3,7 @@ Scaffold a new AdonisJS application using starter kits
 
 <br />
 
-[![gh-workflow-image]][gh-workflow-url] [![npm-image]][npm-url] ![][typescript-image] [![license-image]][license-url] [![snyk-image]][snyk-url]
-
+[![gh-workflow-image]][gh-workflow-url] [![npm-image]][npm-url] ![][typescript-image] [![license-image]][license-url]
 ## Starter kits
 
 You can use between one of the following official starter kits, or bring your own using the `--kit` flag.
@@ -103,10 +102,8 @@ create-adonisjs is open-sourced software licensed under the [MIT license](LICENS
 
 [gh-workflow-image]: https://img.shields.io/github/actions/workflow/status/adonisjs/create-adonisjs/test.yml?style=for-the-badge
 [gh-workflow-url]: https://github.com/adonisjs/create-adonisjs/actions/workflows/test.yml 'Github action'
-[npm-image]: https://img.shields.io/npm/v/@adonisjs/create-adonisjs/latest.svg?style=for-the-badge&logo=npm
-[npm-url]: https://www.npmjs.com/package/@adonisjs/create-adonisjs/v/latest 'npm'
+[npm-image]: https://img.shields.io/npm/v/create-adonisjs/latest.svg?style=for-the-badge&logo=npm
+[npm-url]: https://www.npmjs.com/package/create-adonisjs/v/latest 'npm'
 [typescript-image]: https://img.shields.io/badge/Typescript-294E80.svg?style=for-the-badge&logo=typescript
 [license-url]: LICENSE.md
 [license-image]: https://img.shields.io/github/license/adonisjs/create-adonisjs?style=for-the-badge
-[snyk-image]: https://img.shields.io/snyk/vulnerabilities/github/adonisjs/create-adonisjs?label=Snyk%20Vulnerabilities&style=for-the-badge
-[snyk-url]: https://snyk.io/test/github/adonisjs/create-adonisjs?targetFile=package.json 'snyk'

@@ -10,7 +10,6 @@
 import { execa } from 'execa'
 import { join } from 'node:path'
 import { test } from '@japa/runner'
-import { pathToFileURL } from 'node:url'
 
 import { kernel } from '../index.js'
 import { CreateNewApp } from '../commands/main.js'

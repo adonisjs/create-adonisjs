@@ -1,7 +1,7 @@
 {
   "name": "create-adonisjs",
   "description": "Scaffold new AdonisJS applications using starter kits",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "main": "build/index.js",
   "type": "module",
   "files": [
@@ -63,7 +63,10 @@
   },
   "author": "julien-r44,virk",
   "license": "MIT",
-  "keywords": ["adonisjs", "create-adonisjs-app"],
+  "keywords": [
+    "adonisjs",
+    "create-adonisjs-app"
+  ],
   "eslintConfig": {
     "extends": "@adonisjs/eslint-config/package"
   },

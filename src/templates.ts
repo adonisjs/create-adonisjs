@@ -13,17 +13,17 @@
 export const templates = [
   {
     name: 'Slim Starter Kit',
-    hint: 'Smallest possible AdonisJS application with just the core and Japa',
+    hint: 'A lean AdonisJS application with just the framework core',
     source: 'github:adonisjs/slim-starter-kit',
   },
-  {
-    name: 'Web Starter Kit',
-    hint: 'for building web applications',
-    source: 'github:adonisjs/web-starter-kit',
-  },
-  {
-    name: 'API Starter Kit',
-    hint: 'for building APIs',
-    source: 'github:adonisjs/api-starter-kit',
-  },
+  // {
+  //   name: 'Web Starter Kit',
+  //   hint: 'Everything you need to build a server render app',
+  //   source: 'github:adonisjs/web-starter-kit',
+  // },
+  // {
+  //   name: 'API Starter Kit',
+  //   hint: 'AdonisJS app tailored for creating JSON APIs',
+  //   source: 'github:adonisjs/api-starter-kit',
+  // },
 ]

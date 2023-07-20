@@ -1,14 +1,13 @@
 # create-adonisjs
-
-![image](https://github.com/adonisjs/create-adonisjs/assets/8337858/97c07232-dd6b-415b-88e7-571941da21e3)
+Scaffold a new AdonisJS application using starter kits
 
 <br />
 
 [![gh-workflow-image]][gh-workflow-url] [![npm-image]][npm-url] ![][typescript-image] [![license-image]][license-url] [![snyk-image]][snyk-url]
 
-## Introduction
+## Starter kits
 
-Scaffolding tool for AdonisJS applications. You can choose between 3 different starter kits :
+You can use between one of the following official starter kits, or bring your own using the `--kit` flag.
 
 - `api` : AdonisJS application tailored for building HTTP APIs.
 - `web` : AdonisJS application tailored for building server-side rendered applications.
@@ -38,11 +37,12 @@ npm init adonisjs my-app
 ```
 
 This argument is optional and the command will prompt you to enter the directory name if not provided.
-Note that the directory must be empty otherwise the command will fail.
+
+> **Note** - The directory must be empty otherwise the command will fail.
 
 ### `--kit`
 
-If you have your own starter kit hosted on Gitlab/Github/Bitbucket, then you can pass it as follows:
+If you want to use your own starter kit hosted on Github, Gitlab, or Bitbucket, you can use the `--kit` flag to define the repo URL.
 
 ```sh
 npm init adonisjs -- -K="github:github_user/repo"
@@ -72,12 +72,12 @@ If you are using a custom starter kit hosted on a private repository, then you c
 npm init adonisjs -- -K="github:github_user/repo" -t="github_token"
 ```
 
-### `--package-manager`
+### `--pkg`
 
 We are trying to detect the package manager used by your project. However, if you want to force a specific package manager, then you can pass it as follows:
 
 ```sh
-npm init adonisjs -- --package-manager="yarn"
+npm init adonisjs -- --pkg="yarn"
 ```
 
 ### Other options

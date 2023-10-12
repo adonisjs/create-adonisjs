@@ -1,7 +1,7 @@
 {
   "name": "create-adonisjs",
   "description": "Scaffold new AdonisJS applications using starter kits",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "main": "build/index.js",
   "type": "module",
   "files": [

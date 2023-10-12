@@ -12,8 +12,8 @@ import { cwd } from 'node:process'
 import { existsSync } from 'node:fs'
 import gradient from 'gradient-string'
 import { downloadTemplate } from 'giget'
-import { isAbsolute, join, relative } from 'node:path'
 import detectPackageManager from 'which-pm-runs'
+import { isAbsolute, join, relative } from 'node:path'
 import { BaseCommand, args, flags } from '@adonisjs/ace'
 import { copyFile, readFile, unlink, writeFile } from 'node:fs/promises'
 
@@ -26,7 +26,7 @@ export class CreateNewApp extends BaseCommand {
   /**
    * The directory where the project will be created
    */
-  @args.string({ description: 'Destination directory', name: 'destination', required: false })
+  @args.string({ description: 'Destination directory', required: false })
   declare destination: string
 
   /**
@@ -37,7 +37,10 @@ export class CreateNewApp extends BaseCommand {
    *   --kit gitlab_user/repo#develop
    *   --kit bitbucket_user/repo#2.0.0
    */
-  @flags.string({ description: 'Define path to a custom git repository', name: 'kit', alias: 'K' })
+  @flags.string({
+    description: 'Define path to a custom git repository',
+    alias: 'K',
+  })
   declare kit?: string
 
   /**
@@ -45,7 +48,6 @@ export class CreateNewApp extends BaseCommand {
    */
   @flags.string({
     description: 'Pass the authentication token to download private repositories',
-    name: 'token',
     alias: 't',
   })
   declare token?: string
@@ -53,19 +55,19 @@ export class CreateNewApp extends BaseCommand {
   /**
    * Skip packages installation
    */
-  @flags.boolean({ description: 'Skip packages installation', name: 'skip-install' })
+  @flags.boolean({ description: 'Skip packages installation' })
   declare skipInstall: boolean
 
   /**
    * Skip git initialization
    */
-  @flags.boolean({ description: 'Skip git initialization', name: 'skip-git-init' })
+  @flags.boolean({ description: 'Skip git initialization' })
   declare skipGitInit: boolean
 
   /**
    * Package manager to use
    */
-  @flags.string({ description: 'Explicitly define the package manager to npm', name: 'pkg' })
+  @flags.string({ description: 'Explicitly define the package manager to npm', flagName: 'pkg' })
   declare packageManager: string
 
   /**

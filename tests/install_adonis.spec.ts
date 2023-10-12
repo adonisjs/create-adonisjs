@@ -23,11 +23,12 @@ test.group('Create new app', (group) => {
   })
 
   test('clone template to destination', async ({ assert, fs }) => {
-    const command = await kernel.create(CreateNewApp, [join(fs.basePath, 'foo')])
-
-    command.kit = 'github:samuelmarina/is-even'
-    command.skipInstall = true
-    command.skipGitInit = true
+    const command = await kernel.create(CreateNewApp, [
+      join(fs.basePath, 'foo'),
+      '--skip-install',
+      '--skip-git-init',
+      '--kit="github:samuelmarina/is-even"',
+    ])
 
     await command.exec()
 
@@ -36,11 +37,12 @@ test.group('Create new app', (group) => {
   })
 
   test('prompt for destination when not provided', async ({ assert }) => {
-    const command = await kernel.create(CreateNewApp, [])
+    const command = await kernel.create(CreateNewApp, [
+      '--skip-install',
+      '--skip-git-init',
+      '--kit="github:samuelmarina/is-even"',
+    ])
 
-    command.kit = 'github:samuelmarina/is-even'
-    command.skipInstall = true
-    command.skipGitInit = true
     command.prompt.trap('Where should we create the project?').replyWith('tmp/foo')
     await command.exec()
 
@@ -51,11 +53,12 @@ test.group('Create new app', (group) => {
   test('fail if destination directory already exists', async ({ assert, fs }) => {
     await fs.create('foo/bar.txt', '')
 
-    const command = await kernel.create(CreateNewApp, [join(fs.basePath, 'foo')])
-
-    command.kit = 'github:samuelmarina/is-even'
-    command.skipInstall = true
-    command.skipGitInit = true
+    const command = await kernel.create(CreateNewApp, [
+      join(fs.basePath, 'foo'),
+      '--skip-install',
+      '--skip-git-init',
+      '--kit="github:samuelmarina/is-even"',
+    ])
 
     await command.exec()
 
@@ -75,13 +78,13 @@ test.group('Create new app', (group) => {
     .run(async ({ assert, fs }, { agent, lockFile }) => {
       process.env.npm_config_user_agent = agent
 
-      const command = await kernel.create(CreateNewApp, [join(fs.basePath, 'foo')])
-
+      const command = await kernel.create(CreateNewApp, [
+        join(fs.basePath, 'foo'),
+        '--skip-git-init',
+        '--kit="github:samuelmarina/is-even"',
+      ])
       command.prompt.trap('Do you want to install dependencies?').replyWith(true)
 
-      command.kit = 'github:samuelmarina/is-even'
-      command.skipInstall = false
-      command.skipGitInit = true
       await command.exec()
 
       await assert.fileExists(`foo/${lockFile}`)
@@ -90,12 +93,12 @@ test.group('Create new app', (group) => {
     })
 
   test('do not install dependencies', async ({ assert, fs }) => {
-    const command = await kernel.create(CreateNewApp, [join(fs.basePath, 'foo')])
-
-    command.kit = 'github:samuelmarina/is-even'
-    command.packageManager = 'npm'
-    command.skipInstall = true
-    command.skipGitInit = true
+    const command = await kernel.create(CreateNewApp, [
+      join(fs.basePath, 'foo'),
+      '--skip-install',
+      '--skip-git-init',
+      '--kit="github:samuelmarina/is-even"',
+    ])
 
     await command.exec()
 
@@ -103,13 +106,13 @@ test.group('Create new app', (group) => {
   })
 
   test('initialize git repo', async ({ assert, fs }) => {
-    const command = await kernel.create(CreateNewApp, [join(fs.basePath, 'foo')])
+    const command = await kernel.create(CreateNewApp, [
+      join(fs.basePath, 'foo'),
+      '--skip-install',
+      '--kit="github:samuelmarina/is-even"',
+    ])
 
     command.prompt.trap('Do you want to initialize a git repository?').replyWith(true)
-
-    command.kit = 'github:samuelmarina/is-even'
-    command.skipInstall = true
-    command.skipGitInit = false
 
     await command.exec()
 
@@ -117,13 +120,12 @@ test.group('Create new app', (group) => {
   })
 
   test('do not initialize git repo', async ({ assert, fs }) => {
-    const command = await kernel.create(CreateNewApp, [join(fs.basePath, 'foo')])
-
-    command.prompt.trap('Do you want to initialize a git repository?').replyWith(true)
-
-    command.kit = 'github:samuelmarina/is-even'
-    command.skipInstall = true
-    command.skipGitInit = true
+    const command = await kernel.create(CreateNewApp, [
+      join(fs.basePath, 'foo'),
+      '--skip-install',
+      '--skip-git-init',
+      '--kit="github:samuelmarina/is-even"',
+    ])
 
     await command.exec()
 
@@ -131,11 +133,13 @@ test.group('Create new app', (group) => {
   })
 
   test('force package manager', async ({ assert, fs }) => {
-    const command = await kernel.create(CreateNewApp, [join(fs.basePath, 'foo')])
+    const command = await kernel.create(CreateNewApp, [
+      join(fs.basePath, 'foo'),
+      '--pkg="yarn"',
+      '--skip-git-init',
+      '--kit="github:samuelmarina/is-even"',
+    ])
 
-    command.kit = 'github:samuelmarina/is-even'
-    command.packageManager = 'yarn'
-    command.skipGitInit = true
     command.prompt.trap('Do you want to install dependencies?').replyWith(true)
 
     await command.exec()
@@ -144,10 +148,11 @@ test.group('Create new app', (group) => {
   })
 
   test('configure slim starter kit', async ({ assert, fs }) => {
-    const command = await kernel.create(CreateNewApp, [join(fs.basePath, 'foo')])
-
-    command.kit = 'github:adonisjs/slim-starter-kit'
-    command.packageManager = 'npm'
+    const command = await kernel.create(CreateNewApp, [
+      join(fs.basePath, 'foo'),
+      '--pkg="npm"',
+      '--kit="github:adonisjs/slim-starter-kit"',
+    ])
 
     command.prompt.trap('Do you want to install dependencies?').replyWith(true)
     command.prompt.trap('Do you want to initialize a git repository?').replyWith(true)
@@ -161,9 +166,7 @@ test.group('Create new app', (group) => {
   }).disableTimeout()
 
   test('prompt for kit selection when not pre-defined', async ({ assert, fs }) => {
-    const command = await kernel.create(CreateNewApp, [join(fs.basePath, 'foo')])
-
-    command.packageManager = 'npm'
+    const command = await kernel.create(CreateNewApp, [join(fs.basePath, 'foo'), '--pkg="npm"'])
 
     command.prompt.trap('Select the template you want to use').chooseOption(0)
     command.prompt.trap('Do you want to install dependencies?').replyWith(true)
@@ -178,10 +181,11 @@ test.group('Create new app', (group) => {
   }).disableTimeout()
 
   test('copy .env', async ({ assert, fs }) => {
-    const command = await kernel.create(CreateNewApp, [join(fs.basePath, 'foo')])
-
-    command.kit = 'github:adonisjs/slim-starter-kit'
-    command.packageManager = 'npm'
+    const command = await kernel.create(CreateNewApp, [
+      join(fs.basePath, 'foo'),
+      '--pkg="npm"',
+      '--kit="github:adonisjs/slim-starter-kit"',
+    ])
 
     command.prompt.trap('Do you want to install dependencies?').replyWith(true)
     command.prompt.trap('Do you want to initialize a git repository?').replyWith(true)
@@ -191,10 +195,11 @@ test.group('Create new app', (group) => {
   }).disableTimeout()
 
   test('remove README file', async ({ assert, fs }) => {
-    const command = await kernel.create(CreateNewApp, [join(fs.basePath, 'foo')])
-
-    command.kit = 'github:adonisjs/slim-starter-kit'
-    command.packageManager = 'npm'
+    const command = await kernel.create(CreateNewApp, [
+      join(fs.basePath, 'foo'),
+      '--pkg="npm"',
+      '--kit="github:adonisjs/slim-starter-kit"',
+    ])
 
     command.prompt.trap('Do you want to install dependencies?').replyWith(true)
     command.prompt.trap('Do you want to initialize a git repository?').replyWith(true)

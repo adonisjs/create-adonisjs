@@ -56,13 +56,13 @@ export class CreateNewApp extends BaseCommand {
    * Skip packages installation
    */
   @flags.boolean({ description: 'Skip packages installation' })
-  declare skipInstall: boolean
+  declare skipInstall?: boolean
 
   /**
    * Skip git initialization
    */
   @flags.boolean({ description: 'Skip git initialization' })
-  declare skipGitInit: boolean
+  declare skipGitInit?: boolean
 
   /**
    * Package manager to use
@@ -131,10 +131,13 @@ export class CreateNewApp extends BaseCommand {
       return
     }
 
-    this.#shouldInstallDependencies = await this.prompt.confirm(
-      'Do you want to install dependencies?',
-      { hint: this.packageManager + ' will be used', default: true }
-    )
+    this.#shouldInstallDependencies =
+      this.skipInstall === false
+        ? true
+        : await this.prompt.confirm('Do you want to install dependencies?', {
+            hint: this.packageManager + ' will be used',
+            default: true,
+          })
 
     if (!this.#shouldInstallDependencies) {
       return
@@ -162,9 +165,12 @@ export class CreateNewApp extends BaseCommand {
       return
     }
 
-    const shouldInit = await this.prompt.confirm('Do you want to initialize a git repository?', {
-      default: true,
-    })
+    const shouldInit =
+      this.skipGitInit === false
+        ? true
+        : await this.prompt.confirm('Do you want to initialize a git repository?', {
+            default: true,
+          })
 
     if (!shouldInit) {
       return
@@ -269,6 +275,9 @@ export class CreateNewApp extends BaseCommand {
     if (!this.packageManager) {
       this.packageManager = detectPackageManager()?.name || 'npm'
     }
+
+    console.log('this.skipInstall', this.skipInstall)
+    console.log('this.skipGitInit', this.skipGitInit)
 
     this.#printTitle()
 

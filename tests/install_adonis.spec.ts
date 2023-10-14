@@ -207,4 +207,25 @@ test.group('Create new app', (group) => {
     await command.exec()
     await assert.fileNotExists('foo/README.md')
   }).disableTimeout()
+
+  test('no skip install and no skip git init', async ({ assert, fs }) => {
+    const command = await kernel.create(CreateNewApp, [
+      join(fs.basePath, 'foo'),
+      '--pkg="npm"',
+      '--no-skip-install',
+      '--no-skip-git-init',
+      '--kit="github:adonisjs/slim-starter-kit"',
+    ])
+
+    assert.isFalse(command.skipInstall)
+    assert.isFalse(command.skipGitInit)
+
+    await command.exec()
+
+    const result = await execa('node', ['ace', '--help'], { cwd: join(fs.basePath, 'foo') })
+
+    assert.deepEqual(result.exitCode, 0)
+    assert.deepInclude(result.stdout, 'View list of available commands')
+    await assert.fileExists('foo/package.json')
+  })
 })

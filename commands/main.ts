@@ -276,9 +276,6 @@ export class CreateNewApp extends BaseCommand {
       this.packageManager = detectPackageManager()?.name || 'npm'
     }
 
-    console.log('this.skipInstall', this.skipInstall)
-    console.log('this.skipGitInit', this.skipGitInit)
-
     this.#printTitle()
 
     await this.#setDestination()

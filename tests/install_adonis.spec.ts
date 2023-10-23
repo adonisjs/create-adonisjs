@@ -25,8 +25,8 @@ test.group('Create new app', (group) => {
   test('clone template to destination', async ({ assert, fs }) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
-      '--skip-install',
-      '--skip-git-init',
+      '--no-install',
+      '--no-git-init',
       '--kit="github:samuelmarina/is-even"',
     ])
 
@@ -38,8 +38,8 @@ test.group('Create new app', (group) => {
 
   test('prompt for destination when not provided', async ({ assert }) => {
     const command = await kernel.create(CreateNewApp, [
-      '--skip-install',
-      '--skip-git-init',
+      '--no-install',
+      '--no-git-init',
       '--kit="github:samuelmarina/is-even"',
     ])
 
@@ -55,8 +55,8 @@ test.group('Create new app', (group) => {
 
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
-      '--skip-install',
-      '--skip-git-init',
+      '--no-install',
+      '--no-git-init',
       '--kit="github:samuelmarina/is-even"',
     ])
 
@@ -80,7 +80,7 @@ test.group('Create new app', (group) => {
 
       const command = await kernel.create(CreateNewApp, [
         join(fs.basePath, 'foo'),
-        '--skip-git-init',
+        '--no-git-init',
         '--kit="github:samuelmarina/is-even"',
       ])
       command.prompt.trap('Do you want to install dependencies?').replyWith(true)
@@ -95,8 +95,8 @@ test.group('Create new app', (group) => {
   test('do not install dependencies', async ({ assert, fs }) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
-      '--skip-install',
-      '--skip-git-init',
+      '--no-install',
+      '--no-git-init',
       '--kit="github:samuelmarina/is-even"',
     ])
 
@@ -105,10 +105,10 @@ test.group('Create new app', (group) => {
     await assert.fileNotExists(`foo/package-lock.json`)
   })
 
-  test('initialize git repo', async ({ assert, fs }) => {
+  test('prompt for initialize git repo', async ({ assert, fs }) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
-      '--skip-install',
+      '--no-install',
       '--kit="github:samuelmarina/is-even"',
     ])
 
@@ -122,8 +122,8 @@ test.group('Create new app', (group) => {
   test('do not initialize git repo', async ({ assert, fs }) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
-      '--skip-install',
-      '--skip-git-init',
+      '--no-install',
+      '--no-git-init',
       '--kit="github:samuelmarina/is-even"',
     ])
 
@@ -136,7 +136,7 @@ test.group('Create new app', (group) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
       '--pkg="yarn"',
-      '--skip-git-init',
+      '--no-git-init',
       '--kit="github:samuelmarina/is-even"',
     ])
 
@@ -208,24 +208,31 @@ test.group('Create new app', (group) => {
     await assert.fileNotExists('foo/README.md')
   }).disableTimeout()
 
-  test('no skip install and no skip git init', async ({ assert, fs }) => {
+  test('install dependencies without prompt', async ({ assert, fs }) => {
+    process.env.npm_config_user_agent = 'npm/7.0.0 node/v15.0.0 darwin x64'
+
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
-      '--pkg="npm"',
-      '--no-skip-install',
-      '--no-skip-git-init',
-      '--kit="github:adonisjs/slim-starter-kit"',
+      '--install',
+      '--no-git-init',
+      '--kit="github:samuelmarina/is-even"',
     ])
-
-    assert.isFalse(command.skipInstall)
-    assert.isFalse(command.skipGitInit)
 
     await command.exec()
 
-    const result = await execa('node', ['ace', '--help'], { cwd: join(fs.basePath, 'foo') })
+    await assert.dirExists(`foo/node_modules`)
+  })
 
-    assert.deepEqual(result.exitCode, 0)
-    assert.deepInclude(result.stdout, 'View list of available commands')
-    await assert.fileExists('foo/package.json')
+  test('initialize git repository without prompt', async ({ assert, fs }) => {
+    const command = await kernel.create(CreateNewApp, [
+      join(fs.basePath, 'foo'),
+      '--no-install',
+      '--git-init',
+      '--kit="github:samuelmarina/is-even"',
+    ])
+
+    await command.exec()
+
+    await assert.dirExists(`foo/.git`)
   })
 })

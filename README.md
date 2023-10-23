@@ -81,12 +81,12 @@ npm init adonisjs -- --pkg="yarn"
 
 ### Other options
 
-| Option               | Description                               |
-|----------------------|-------------------------------------------|
-| `--skip-install`     | Skip installing dependencies.             |
-| `--skip-git-init`    | Skip initializing git repository.         |
-| `--no-skip-install`  | Install dependencies without prompt.      |
-| `--no-skip-git-init` | Initialize git repository without prompt. |
+| Option            | Description                       |
+|-------------------|-----------------------------------|
+| `--install`       | Install dependencies.             |
+| `--git-init`      | Initialize git repository.        |
+| `--no-install`    | Don't install dependencies.       |
+| `--no-git-init`   | Don't initialize git repository.  |
 
 ## Contributing
 

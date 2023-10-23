@@ -55,14 +55,14 @@ export class CreateNewApp extends BaseCommand {
   /**
    * Skip packages installation
    */
-  @flags.boolean({ description: 'Skip packages installation' })
-  declare skipInstall?: boolean
+  @flags.boolean({ description: 'Packages installation' })
+  declare install?: boolean
 
   /**
    * Skip git initialization
    */
-  @flags.boolean({ description: 'Skip git initialization' })
-  declare skipGitInit?: boolean
+  @flags.boolean({ description: 'Git initialization' })
+  declare gitInit?: boolean
 
   /**
    * Package manager to use
@@ -127,17 +127,16 @@ export class CreateNewApp extends BaseCommand {
    * Install dependencies with the detected package manager
    */
   async #installDependencies() {
-    if (this.skipInstall) {
+    if (this.install === false) {
       return
     }
 
     this.#shouldInstallDependencies =
-      this.skipInstall === false
-        ? true
-        : await this.prompt.confirm('Do you want to install dependencies?', {
-            hint: this.packageManager + ' will be used',
-            default: true,
-          })
+      this.install ||
+      (await this.prompt.confirm('Do you want to install dependencies?', {
+        hint: this.packageManager + ' will be used',
+        default: true,
+      }))
 
     if (!this.#shouldInstallDependencies) {
       return
@@ -161,16 +160,15 @@ export class CreateNewApp extends BaseCommand {
    * Init git repository inside the destination directory
    */
   async #initGitRepo() {
-    if (this.skipGitInit) {
+    if (this.gitInit === false) {
       return
     }
 
     const shouldInit =
-      this.skipGitInit === false
-        ? true
-        : await this.prompt.confirm('Do you want to initialize a git repository?', {
-            default: true,
-          })
+      this.gitInit ||
+      (await this.prompt.confirm('Do you want to initialize a git repository?', {
+        default: true,
+      }))
 
     if (!shouldInit) {
       return

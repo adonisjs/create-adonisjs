@@ -208,20 +208,27 @@ test.group('Create new app', (group) => {
     await assert.fileNotExists('foo/README.md')
   }).disableTimeout()
 
-  test('install dependencies without prompt', async ({ assert, fs }) => {
-    process.env.npm_config_user_agent = 'npm/7.0.0 node/v15.0.0 darwin x64'
-
-    const command = await kernel.create(CreateNewApp, [
-      join(fs.basePath, 'foo'),
-      '--install',
-      '--no-git-init',
-      '--kit="github:samuelmarina/is-even"',
+  test('install dependencies without prompt')
+    .with([
+      { agent: 'npm/7.0.0 node/v15.0.0 darwin x64', lockFile: 'package-lock.json' },
+      { agent: 'pnpm/5.0.0 node/v15.0.0 darwin x64', lockFile: 'pnpm-lock.yaml' },
+      { agent: 'yarn/1.22.5 npm/? node/v15.0.0 darwin x64', lockFile: 'yarn.lock' },
     ])
+    .run(async ({ assert, fs }, { agent, lockFile }) => {
+      process.env.npm_config_user_agent = agent
 
-    await command.exec()
+      const command = await kernel.create(CreateNewApp, [
+        join(fs.basePath, 'foo'),
+        '--install',
+        '--no-git-init',
+        '--kit="github:samuelmarina/is-even"',
+      ])
 
-    await assert.dirExists(`foo/node_modules`)
-  })
+      await command.exec()
+
+      await assert.fileExists(`foo/${lockFile}`)
+      process.env.npm_config_user_agent = undefined
+    })
 
   test('initialize git repository without prompt', async ({ assert, fs }) => {
     const command = await kernel.create(CreateNewApp, [

@@ -22,11 +22,12 @@ test.group('Create new app', (group) => {
     }
   })
 
+  group.each.disableTimeout()
+
   test('clone template to destination', async ({ assert, fs }) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
       '--no-install',
-      '--no-git-init',
       '--kit="github:samuelmarina/is-even"',
     ])
 
@@ -39,15 +40,51 @@ test.group('Create new app', (group) => {
   test('prompt for destination when not provided', async ({ assert }) => {
     const command = await kernel.create(CreateNewApp, [
       '--no-install',
-      '--no-git-init',
       '--kit="github:samuelmarina/is-even"',
     ])
 
-    command.prompt.trap('Where should we create the project?').replyWith('tmp/foo')
+    command.prompt.trap('Where should we create your new project?').replyWith('tmp/foo')
     await command.exec()
 
     await assert.dirIsNotEmpty('foo')
     await assert.fileExists('foo/package.json')
+  })
+
+  test('prompt for kit selection when not pre-defined', async ({ assert, fs }) => {
+    const command = await kernel.create(CreateNewApp, [
+      join(fs.basePath, 'foo'),
+      '--pkg="npm"',
+      '--install',
+    ])
+
+    command.prompt.trap('Which starter kit would you like to use?').chooseOption(0)
+
+    await command.exec()
+
+    const result = await execa('node', ['ace', '--help'], { cwd: join(fs.basePath, 'foo') })
+
+    assert.deepEqual(result.exitCode, 0)
+    assert.deepInclude(result.stdout, 'View list of available commands')
+  })
+
+  test('prompt for install dependencies when --install flag is not used', async ({
+    assert,
+    fs,
+  }) => {
+    const command = await kernel.create(CreateNewApp, [
+      join(fs.basePath, 'foo'),
+      '--pkg="npm"',
+      '-K=slim',
+    ])
+
+    command.prompt.trap('Do you want us to install dependencies using "npm"?').replyWith(true)
+
+    await command.exec()
+
+    const result = await execa('node', ['ace', '--help'], { cwd: join(fs.basePath, 'foo') })
+
+    assert.deepEqual(result.exitCode, 0)
+    assert.deepInclude(result.stdout, 'View list of available commands')
   })
 
   test('fail if destination directory already exists', async ({ assert, fs }) => {
@@ -56,7 +93,6 @@ test.group('Create new app', (group) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
       '--no-install',
-      '--no-git-init',
       '--kit="github:samuelmarina/is-even"',
     ])
 
@@ -80,10 +116,9 @@ test.group('Create new app', (group) => {
 
       const command = await kernel.create(CreateNewApp, [
         join(fs.basePath, 'foo'),
-        '--no-git-init',
+        '--install',
         '--kit="github:samuelmarina/is-even"',
       ])
-      command.prompt.trap('Do you want to install dependencies?').replyWith(true)
 
       await command.exec()
 
@@ -92,11 +127,10 @@ test.group('Create new app', (group) => {
       process.env.npm_config_user_agent = undefined
     })
 
-  test('do not install dependencies', async ({ assert, fs }) => {
+  test('do not install dependencies when --no-install flag is provided', async ({ assert, fs }) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
       '--no-install',
-      '--no-git-init',
       '--kit="github:samuelmarina/is-even"',
     ])
 
@@ -105,42 +139,26 @@ test.group('Create new app', (group) => {
     await assert.fileNotExists(`foo/package-lock.json`)
   })
 
-  test('prompt for initialize git repo', async ({ assert, fs }) => {
+  test('initialize git repo when --git-init flag is provided', async ({ assert, fs }) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
       '--no-install',
+      '--git-init',
       '--kit="github:samuelmarina/is-even"',
     ])
-
-    command.prompt.trap('Do you want to initialize a git repository?').replyWith(true)
 
     await command.exec()
 
     await assert.dirExists('foo/.git')
   })
 
-  test('do not initialize git repo', async ({ assert, fs }) => {
-    const command = await kernel.create(CreateNewApp, [
-      join(fs.basePath, 'foo'),
-      '--no-install',
-      '--no-git-init',
-      '--kit="github:samuelmarina/is-even"',
-    ])
-
-    await command.exec()
-
-    await assert.dirNotExists('foo/.git')
-  })
-
   test('force package manager', async ({ assert, fs }) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
       '--pkg="yarn"',
-      '--no-git-init',
+      '--install',
       '--kit="github:samuelmarina/is-even"',
     ])
-
-    command.prompt.trap('Do you want to install dependencies?').replyWith(true)
 
     await command.exec()
 
@@ -151,95 +169,51 @@ test.group('Create new app', (group) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
       '--pkg="npm"',
+      '--install',
       '--kit="github:adonisjs/slim-starter-kit"',
     ])
 
-    command.prompt.trap('Do you want to install dependencies?').replyWith(true)
-    command.prompt.trap('Do you want to initialize a git repository?').replyWith(true)
-
     await command.exec()
 
     const result = await execa('node', ['ace', '--help'], { cwd: join(fs.basePath, 'foo') })
 
     assert.deepEqual(result.exitCode, 0)
     assert.deepInclude(result.stdout, 'View list of available commands')
-  }).disableTimeout()
+  })
 
-  test('prompt for kit selection when not pre-defined', async ({ assert, fs }) => {
-    const command = await kernel.create(CreateNewApp, [join(fs.basePath, 'foo'), '--pkg="npm"'])
-
-    command.prompt.trap('Select the template you want to use').chooseOption(0)
-    command.prompt.trap('Do you want to install dependencies?').replyWith(true)
-    command.prompt.trap('Do you want to initialize a git repository?').replyWith(true)
-
-    await command.exec()
-
-    const result = await execa('node', ['ace', '--help'], { cwd: join(fs.basePath, 'foo') })
-
-    assert.deepEqual(result.exitCode, 0)
-    assert.deepInclude(result.stdout, 'View list of available commands')
-  }).disableTimeout()
-
-  test('copy .env', async ({ assert, fs }) => {
+  test('create .env file', async ({ assert, fs }) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
       '--pkg="npm"',
+      '--no-install',
       '--kit="github:adonisjs/slim-starter-kit"',
     ])
 
-    command.prompt.trap('Do you want to install dependencies?').replyWith(true)
-    command.prompt.trap('Do you want to initialize a git repository?').replyWith(true)
-
     await command.exec()
     await assert.fileExists('foo/.env')
-  }).disableTimeout()
+  })
 
   test('remove README file', async ({ assert, fs }) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
       '--pkg="npm"',
+      '--no-install',
       '--kit="github:adonisjs/slim-starter-kit"',
     ])
 
-    command.prompt.trap('Do you want to install dependencies?').replyWith(true)
-    command.prompt.trap('Do you want to initialize a git repository?').replyWith(true)
-
     await command.exec()
     await assert.fileNotExists('foo/README.md')
-  }).disableTimeout()
+  })
 
-  test('install dependencies without prompt')
-    .with([
-      { agent: 'npm/7.0.0 node/v15.0.0 darwin x64', lockFile: 'package-lock.json' },
-      { agent: 'pnpm/5.0.0 node/v15.0.0 darwin x64', lockFile: 'pnpm-lock.yaml' },
-      { agent: 'yarn/1.22.5 npm/? node/v15.0.0 darwin x64', lockFile: 'yarn.lock' },
-    ])
-    .run(async ({ assert, fs }, { agent, lockFile }) => {
-      process.env.npm_config_user_agent = agent
-
-      const command = await kernel.create(CreateNewApp, [
-        join(fs.basePath, 'foo'),
-        '--install',
-        '--no-git-init',
-        '--kit="github:samuelmarina/is-even"',
-      ])
-
-      await command.exec()
-
-      await assert.fileExists(`foo/${lockFile}`)
-      process.env.npm_config_user_agent = undefined
-    })
-
-  test('initialize git repository without prompt', async ({ assert, fs }) => {
+  test('rename package name inside package.json file', async ({ assert, fs }) => {
     const command = await kernel.create(CreateNewApp, [
-      join(fs.basePath, 'foo'),
+      join(fs.basePath, 'foo/bar'),
+      '--pkg="npm"',
       '--no-install',
-      '--git-init',
-      '--kit="github:samuelmarina/is-even"',
+      '--kit="github:adonisjs/slim-starter-kit"',
     ])
 
     await command.exec()
-
-    await assert.dirExists(`foo/.git`)
+    await assert.fileContains('foo/bar/package.json', `"name": "bar"`)
   })
 })

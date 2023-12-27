@@ -13,11 +13,13 @@
 export const templates = [
   {
     name: 'Slim Starter Kit',
+    alias: 'slim',
     hint: 'A lean AdonisJS application with just the framework core',
     source: 'github:adonisjs/slim-starter-kit',
   },
   {
     name: 'Web Starter Kit',
+    alias: 'web',
     hint: 'Everything you need to build a server render app',
     source: 'github:adonisjs/web-starter-kit',
   },

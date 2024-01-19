@@ -1,9 +1,11 @@
 # create-adonisjs
+
 Scaffold a new AdonisJS application using starter kits
 
 <br />
 
 [![gh-workflow-image]][gh-workflow-url] [![npm-image]][npm-url] ![][typescript-image] [![license-image]][license-url]
+
 ## Starter kits
 
 You can use between one of the following official starter kits, or bring your own using the `--kit` flag.
@@ -79,14 +81,38 @@ We are trying to detect the package manager used by your project. However, if yo
 npm init adonisjs -- --pkg="yarn"
 ```
 
+### `--auth-guard`
+
+Specify a custom auth guard to use when using the `api` stater kit. One of the following options are allowed
+
+- `session` (Default)
+- `access_tokens`
+
+### `--db`
+
+Specify the database dialect to configure with Lucid. One of the following options are allowd.
+
+- `sqlite` (Default)
+- `mysql`
+- `mssql`
+- `postgres`
+
 ### Other options
 
-| Option            | Description                       |
-|-------------------|-----------------------------------|
-| `--install`       | Install dependencies.             |
-| `--git-init`      | Initialize git repository.        |
-| `--no-install`    | Don't install dependencies.       |
-| `--no-git-init`   | Don't initialize git repository.  |
+| Option         | Description                                                                             |
+| -------------- | --------------------------------------------------------------------------------------- |
+| `--install`    | Install dependencies. A prompt will be shown when the flag is not mentioned explicitly. |
+| `--git-init`   | Initialize git repository.                                                              |
+| `--no-install` | Explicitly opt out from installing dependencies and skip the prompt                     |
+| `--verbose`    | Enable verbose mode to display all logs                                                 |
+
+## Debugging errors
+
+If creating a new project fails, then you must re-run the same command with the `--verbose` flag to view all the logs.
+
+```sh
+npm init adonisjs my-app -- --verbose
+```
 
 ## Contributing
 

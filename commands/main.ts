@@ -13,8 +13,9 @@ import gradient from 'gradient-string'
 import { downloadTemplate } from 'giget'
 import { type Options, execa } from 'execa'
 import detectPackageManager from 'which-pm-runs'
-import { basename, isAbsolute, join, relative } from 'node:path'
+import { installPackage } from '@antfu/install-pkg'
 import { BaseCommand, args, flags } from '@adonisjs/ace'
+import { basename, isAbsolute, join, relative } from 'node:path'
 import { copyFile, readFile, unlink, writeFile } from 'node:fs/promises'
 
 import { templates } from '../src/templates.js'
@@ -267,10 +268,41 @@ export class CreateNewApp extends BaseCommand {
   }
 
   /**
+   * Configures the session package
+   */
+  async #configureSession() {
+    await installPackage(['@adonisjs/session@latest'], {
+      cwd: this.destination,
+      packageManager: this.packageManager,
+      silent: !this.verbose,
+    })
+
+    const argv = ['ace', 'configure', '@adonisjs/session']
+    if (this.verbose) {
+      argv.push('--verbose')
+    }
+
+    await this.#runBashCommand('node', argv)
+  }
+
+  /**
    * Configures the Auth package
    */
   async #configureAuth() {
     this.authGuard = this.authGuard || 'session'
+
+    /**
+     * Install the session package when using api starter kit with session
+     * guard. This needs to be done, since the api starter kit does
+     * not install the session package by default.
+     */
+    if (this.authGuard === 'session' && this.kit === 'github:adonisjs/api-starter-kit') {
+      await this.#configureSession()
+    }
+
+    /**
+     * Next configure the auth package
+     */
     const argv = ['ace', 'configure', '@adonisjs/auth', '--guard', this.authGuard]
     if (this.verbose) {
       argv.push('--verbose')
@@ -303,8 +335,23 @@ export class CreateNewApp extends BaseCommand {
      */
     const tasks = this.ui.tasks({ verbose: this.verbose === true })
 
-    const configureLucid = this.kit === 'github:adonisjs/web-starter-kit' && this.install !== false
-    const configureAuth = this.kit === 'github:adonisjs/web-starter-kit' && this.install !== false
+    /**
+     * Configure lucid when using web or api starter kits
+     * and installing dependencies
+     */
+    const configureLucid =
+      (this.kit === 'github:adonisjs/web-starter-kit' ||
+        this.kit === 'github:adonisjs/api-starter-kit') &&
+      this.install !== false
+
+    /**
+     * Configure auth when using web or api starter kits
+     * and installing dependencies
+     */
+    const configureAuth =
+      (this.kit === 'github:adonisjs/web-starter-kit' ||
+        this.kit === 'github:adonisjs/api-starter-kit') &&
+      this.install !== false
 
     tasks
       .add('Download starter kit', async (task) => {

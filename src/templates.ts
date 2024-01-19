@@ -23,9 +23,10 @@ export const templates = [
     hint: 'Everything you need to build a server render app',
     source: 'github:adonisjs/web-starter-kit',
   },
-  // {
-  //   name: 'API Starter Kit',
-  //   hint: 'AdonisJS app tailored for creating JSON APIs',
-  //   source: 'github:adonisjs/api-starter-kit',
-  // },
+  {
+    name: 'API Starter Kit',
+    alias: 'api',
+    hint: 'AdonisJS app tailored for creating JSON APIs',
+    source: 'github:adonisjs/api-starter-kit',
+  },
 ]

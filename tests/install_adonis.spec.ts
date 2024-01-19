@@ -218,8 +218,10 @@ test.group('Create new app', (group) => {
   })
 })
 
-test.group('Configure | Web starter kit', () => {
-  test('configure lucid and auth when using web starter kits', async ({ assert, fs }) => {
+test.group('Configure | Web starter kit', (group) => {
+  group.each.disableTimeout()
+
+  test('configure lucid and auth when using web starter kit', async ({ assert, fs }) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
       '--pkg="npm"',
@@ -267,5 +269,74 @@ test.group('Configure | Web starter kit', () => {
 
     await assert.fileContains('foo/config/database.ts', [`client: 'pg'`])
     await assert.fileContains('foo/package.json', ['pg'])
+  })
+})
+
+test.group('Configure | API starter kit', (group) => {
+  group.each.disableTimeout()
+
+  test('configure lucid and auth when using api starter kit', async ({ assert, fs }) => {
+    const command = await kernel.create(CreateNewApp, [
+      join(fs.basePath, 'foo'),
+      '--pkg="npm"',
+      '--install',
+      '-K=api',
+    ])
+
+    await command.exec()
+
+    const result = await execa('node', ['ace', '--help'], { cwd: join(fs.basePath, 'foo') })
+    assert.deepEqual(result.exitCode, 0)
+    assert.deepInclude(result.stdout, 'View list of available commands')
+
+    await assert.fileContains('foo/adonisrc.ts', [
+      `() => import('@adonisjs/lucid/database_provider')`,
+      `() => import('@adonisjs/auth/auth_provider')`,
+      `() => import('@adonisjs/session/session_provider')`,
+      `() => import('@adonisjs/lucid/commands')`,
+    ])
+    await assert.fileContains('foo/start/kernel.ts', [
+      `() => import('@adonisjs/session/session_middleware')`,
+    ])
+    await assert.fileExists('foo/config/database.ts')
+    await assert.fileExists('foo/config/auth.ts')
+    await assert.fileExists('foo/config/session.ts')
+    await assert.fileExists('foo/app/models/user.ts')
+    await assert.fileContains('foo/package.json', [
+      '@adonisjs/session',
+      '@adonisjs/lucid',
+      '@adonisjs/auth',
+      'luxon',
+      '@types/luxon',
+      'better-sqlite',
+    ])
+  })
+
+  test('do not configure session package when using access tokens guard', async ({
+    assert,
+    fs,
+  }) => {
+    const command = await kernel.create(CreateNewApp, [
+      join(fs.basePath, 'foo'),
+      '--pkg="npm"',
+      '--install',
+      '-K=api',
+      '--auth-guard=access_tokens',
+    ])
+
+    await command.exec()
+
+    const result = await execa('node', ['ace', '--help'], { cwd: join(fs.basePath, 'foo') })
+    assert.deepEqual(result.exitCode, 0)
+    assert.deepInclude(result.stdout, 'View list of available commands')
+
+    await assert.fileNotContains('foo/adonisrc.ts', [
+      `() => import('@adonisjs/session/session_provider')`,
+    ])
+    await assert.fileNotContains('foo/start/kernel.ts', [
+      `() => import('@adonisjs/session/session_middleware')`,
+    ])
+    await assert.fileNotExists('foo/config/session.ts')
+    await assert.fileNotContains('foo/package.json', ['@adonisjs/session'])
   })
 })

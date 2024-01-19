@@ -258,15 +258,9 @@ export class CreateNewApp extends BaseCommand {
   async #configureLucid() {
     this.db = this.db || 'sqlite'
 
-    const argv = ['ace', 'configure', '@adonisjs/lucid', '--db', this.db]
+    const argv = ['ace', 'configure', '@adonisjs/lucid', '--db', this.db, '--install']
     if (this.verbose) {
       argv.push('--verbose')
-    }
-
-    if (this.install) {
-      argv.push('--install')
-    } else {
-      argv.push('--no-install')
     }
 
     await this.#runBashCommand('node', argv)

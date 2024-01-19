@@ -217,3 +217,55 @@ test.group('Create new app', (group) => {
     await assert.fileContains('foo/bar/package.json', `"name": "bar"`)
   })
 })
+
+test.group('Configure | Web starter kit', () => {
+  test('configure lucid and auth when using web starter kits', async ({ assert, fs }) => {
+    const command = await kernel.create(CreateNewApp, [
+      join(fs.basePath, 'foo'),
+      '--pkg="npm"',
+      '--install',
+      '-K=web',
+    ])
+
+    await command.exec()
+
+    const result = await execa('node', ['ace', '--help'], { cwd: join(fs.basePath, 'foo') })
+    assert.deepEqual(result.exitCode, 0)
+    assert.deepInclude(result.stdout, 'View list of available commands')
+
+    await assert.fileContains('foo/adonisrc.ts', [
+      `() => import('@adonisjs/lucid/database_provider')`,
+      `() => import('@adonisjs/auth/auth_provider')`,
+      `() => import('@adonisjs/lucid/commands')`,
+    ])
+    await assert.fileExists('foo/config/database.ts')
+    await assert.fileExists('foo/config/auth.ts')
+    await assert.fileExists('foo/app/models/user.ts')
+    await assert.fileContains('foo/package.json', [
+      '@adonisjs/lucid',
+      '@adonisjs/auth',
+      'luxon',
+      '@types/luxon',
+      'better-sqlite',
+    ])
+  })
+
+  test('configure lucid package to use postgresql', async ({ assert, fs }) => {
+    const command = await kernel.create(CreateNewApp, [
+      join(fs.basePath, 'foo'),
+      '--pkg="npm"',
+      '--install',
+      '-K=web',
+      '--db=postgres',
+    ])
+
+    await command.exec()
+
+    const result = await execa('node', ['ace', '--help'], { cwd: join(fs.basePath, 'foo') })
+    assert.deepEqual(result.exitCode, 0)
+    assert.deepInclude(result.stdout, 'View list of available commands')
+
+    await assert.fileContains('foo/config/database.ts', [`client: 'pg'`])
+    await assert.fileContains('foo/package.json', ['pg'])
+  })
+})

@@ -135,7 +135,7 @@ export class CreateNewApp extends BaseCommand {
     ).toString()
 
     this.logger.log('')
-    this.logger.log(`${gradient.mind(title)}`)
+    this.logger.log(`${gradient.mind.multiline(title)}`)
     this.logger.log('')
   }
 

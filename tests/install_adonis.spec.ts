@@ -14,6 +14,8 @@ import { test } from '@japa/runner'
 import { kernel } from '../index.js'
 import { CreateNewApp } from '../commands/main.js'
 
+const VERBOSE = !!process.env.CI
+
 test.group('Create new app', (group) => {
   group.each.setup(() => {
     kernel.ui.switchMode('raw')
@@ -31,6 +33,7 @@ test.group('Create new app', (group) => {
       '--kit="github:samuelmarina/is-even"',
     ])
 
+    command.verbose = VERBOSE
     await command.exec()
 
     await assert.dirIsNotEmpty('foo')
@@ -43,6 +46,7 @@ test.group('Create new app', (group) => {
       '--kit="github:samuelmarina/is-even"',
     ])
 
+    command.verbose = VERBOSE
     command.prompt.trap('Where should we create your new project?').replyWith('tmp/foo')
     await command.exec()
 
@@ -57,6 +61,7 @@ test.group('Create new app', (group) => {
       '--install',
     ])
 
+    command.verbose = VERBOSE
     command.prompt.trap('Which starter kit would you like to use?').chooseOption(0)
 
     await command.exec()
@@ -77,6 +82,7 @@ test.group('Create new app', (group) => {
       '-K=slim',
     ])
 
+    command.verbose = VERBOSE
     command.prompt.trap('Do you want us to install dependencies using "npm"?').replyWith(true)
 
     await command.exec()
@@ -96,6 +102,7 @@ test.group('Create new app', (group) => {
       '--kit="github:samuelmarina/is-even"',
     ])
 
+    command.verbose = VERBOSE
     await command.exec()
 
     await assert.dirIsNotEmpty('foo')
@@ -120,6 +127,7 @@ test.group('Create new app', (group) => {
         '--kit="github:samuelmarina/is-even"',
       ])
 
+      command.verbose = VERBOSE
       await command.exec()
 
       await assert.fileExists(`foo/${lockFile}`)
@@ -134,6 +142,7 @@ test.group('Create new app', (group) => {
       '--kit="github:samuelmarina/is-even"',
     ])
 
+    command.verbose = VERBOSE
     await command.exec()
 
     await assert.fileNotExists(`foo/package-lock.json`)
@@ -147,6 +156,7 @@ test.group('Create new app', (group) => {
       '--kit="github:samuelmarina/is-even"',
     ])
 
+    command.verbose = VERBOSE
     await command.exec()
 
     await assert.dirExists('foo/.git')
@@ -160,6 +170,7 @@ test.group('Create new app', (group) => {
       '--kit="github:samuelmarina/is-even"',
     ])
 
+    command.verbose = VERBOSE
     await command.exec()
 
     await assert.fileExists('foo/yarn.lock')
@@ -173,6 +184,7 @@ test.group('Create new app', (group) => {
       '--kit="github:adonisjs/slim-starter-kit"',
     ])
 
+    command.verbose = VERBOSE
     await command.exec()
 
     const result = await execa('node', ['ace', '--help'], { cwd: join(fs.basePath, 'foo') })
@@ -189,6 +201,7 @@ test.group('Create new app', (group) => {
       '--kit="github:adonisjs/slim-starter-kit"',
     ])
 
+    command.verbose = VERBOSE
     await command.exec()
     await assert.fileExists('foo/.env')
   })
@@ -201,6 +214,7 @@ test.group('Create new app', (group) => {
       '--kit="github:adonisjs/slim-starter-kit"',
     ])
 
+    command.verbose = VERBOSE
     await command.exec()
     await assert.fileNotExists('foo/README.md')
   })
@@ -213,6 +227,7 @@ test.group('Create new app', (group) => {
       '--kit="github:adonisjs/slim-starter-kit"',
     ])
 
+    command.verbose = VERBOSE
     await command.exec()
     await assert.fileContains('foo/bar/package.json', `"name": "bar"`)
   })
@@ -229,6 +244,7 @@ test.group('Configure | Web starter kit', (group) => {
       '-K=web',
     ])
 
+    command.verbose = VERBOSE
     await command.exec()
 
     const result = await execa('node', ['ace', '--help'], { cwd: join(fs.basePath, 'foo') })
@@ -261,6 +277,7 @@ test.group('Configure | Web starter kit', (group) => {
       '--db=postgres',
     ])
 
+    command.verbose = VERBOSE
     await command.exec()
 
     const result = await execa('node', ['ace', '--help'], { cwd: join(fs.basePath, 'foo') })
@@ -283,6 +300,7 @@ test.group('Configure | API starter kit', (group) => {
       '-K=api',
     ])
 
+    command.verbose = VERBOSE
     await command.exec()
 
     const result = await execa('node', ['ace', '--help'], { cwd: join(fs.basePath, 'foo') })
@@ -324,6 +342,7 @@ test.group('Configure | API starter kit', (group) => {
       '--auth-guard=access_tokens',
     ])
 
+    command.verbose = VERBOSE
     await command.exec()
 
     const result = await execa('node', ['ace', '--help'], { cwd: join(fs.basePath, 'foo') })

@@ -41,39 +41,39 @@ This argument is optional and the command will prompt you to enter the directory
 
 > **Note** - The directory must be empty otherwise the command will fail.
 
-### `--kit`
+### `--kit` (Default: Triggers prompt for selection)
 
 If you want to use your own starter kit hosted on Github, Gitlab, or Bitbucket, you can use the `--kit` flag to define the repo URL.
 
 ```sh
-npm init adonisjs -- -K="github:github_user/repo"
+npm init adonisjs -- --kit="github:github_user/repo"
 
 # Download from GitLab
-npm init adonisjs -- -K="gitlab:user/repo"
+npm init adonisjs -- --kit="gitlab:user/repo"
 
 # Download from BitBucket
-npm init adonisjs -- -K="bitbucket:user/repo"
+npm init adonisjs -- --kit="bitbucket:user/repo"
 ```
 
 You can also pass specify the branch or tag name as follows:
 
 ```sh
 # Branch name
-npm init adonisjs -- -K="github:github_user/repo#branch-name"
+npm init adonisjs -- --kit="github:github_user/repo#branch-name"
 
 # Tag name
-npm init adonisjs -- -K="github:github_user/repo#v1.0.0"
+npm init adonisjs -- --kit="github:github_user/repo#v1.0.0"
 ```
 
-### `--token`
+### `--token` (Default: undefined)
 
 If you are using a custom starter kit hosted on a private repository, then you can pass the authentication token as follows:
 
 ```sh
-npm init adonisjs -- -K="github:github_user/repo" -t="github_token"
+npm init adonisjs -- --kit="github:github_user/repo" --token="github_token"
 ```
 
-### `--pkg`
+### `--pkg` (Default: Auto detects)
 
 We are trying to detect the package manager used by your project. However, if you want to force a specific package manager, then you can pass it as follows:
 
@@ -81,14 +81,18 @@ We are trying to detect the package manager used by your project. However, if yo
 npm init adonisjs -- --pkg="yarn"
 ```
 
-### `--auth-guard`
+### `--auth-guard` (Default: session)
 
 Specify a custom auth guard to use when using the `api` stater kit. One of the following options are allowed
 
 - `session` (Default)
 - `access_tokens`
 
-### `--db`
+```sh
+npm init adonisjs -- --kit="api" --auth-guard="access_tokens"
+```
+
+### `--db` (Default: sqlite)
 
 Specify the database dialect to configure with Lucid. One of the following options are allowd.
 
@@ -96,6 +100,10 @@ Specify the database dialect to configure with Lucid. One of the following optio
 - `mysql`
 - `mssql`
 - `postgres`
+
+```sh
+npm init adonisjs -- --kit="web" --db="mysql"
+```
 
 ### Other options
 
@@ -111,7 +119,7 @@ Specify the database dialect to configure with Lucid. One of the following optio
 If creating a new project fails, then you must re-run the same command with the `--verbose` flag to view all the logs.
 
 ```sh
-npm init adonisjs my-app -- --verbose
+npm init adonisjs -- --verbose
 ```
 
 ## Contributing

@@ -55,7 +55,7 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "@adonisjs/ace": "^12.3.2-6",
+    "@adonisjs/ace": "^13.0.0",
     "@antfu/install-pkg": "^0.3.1",
     "execa": "^8.0.1",
     "giget": "^1.2.1",

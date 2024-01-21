@@ -231,6 +231,17 @@ export class CreateNewApp extends BaseCommand {
   }
 
   /**
+   * Optionally remove existing lock file. Errors are ignored
+   */
+  async #removeLockFile() {
+    await Promise.allSettled([
+      unlink(join(this.destination, 'package-lock.json')),
+      unlink(join(this.destination, 'yarn.lock')),
+      unlink(join(this.destination, 'pnpm-lock.yaml')),
+    ])
+  }
+
+  /**
    * If starter template has an `.env.example` file, then copy it to `.env`
    */
   async #copyEnvExampleFile() {
@@ -357,6 +368,7 @@ export class CreateNewApp extends BaseCommand {
       .add('Download starter kit', async (task) => {
         task.update(`Downloading "${this.kit}"`)
         await downloadTemplate(this.kit!, { dir: this.destination, auth: this.token })
+        await this.#removeLockFile()
         return `Downloaded "${this.kit}"`
       })
       .addIf(this.gitInit === true, 'Initialize git repository', async () => {

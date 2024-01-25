@@ -95,7 +95,7 @@ export class CreateNewApp extends BaseCommand {
   declare db?: string
 
   /**
-   * Auth guard for auth package. Defaults to "session"
+   * Auth guard for auth package.
    */
   @flags.string({
     description: 'Define the authentication guard for the Auth package',
@@ -204,11 +204,11 @@ export class CreateNewApp extends BaseCommand {
       /**
        * Display prompt when "db" flag is not used.
        */
-      const template = await this.prompt.choice(
+      const database = await this.prompt.choice(
         'Select the database driver you want to use',
         databases
       )
-      this.db = databases.find((t) => t.name === template)!.alias
+      this.db = databases.find((t) => t.name === database)!.alias
     }
   }
 

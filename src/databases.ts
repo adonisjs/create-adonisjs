@@ -28,7 +28,7 @@ export const databases = [
     alias: 'mssql',
   },
   {
-    name: 'Do not initial database',
+    name: 'Skip',
     hint: 'I want to configures the Lucid package by myself.',
     alias: undefined,
   },

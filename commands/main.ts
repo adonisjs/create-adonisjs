@@ -19,6 +19,7 @@ import { basename, isAbsolute, join, relative } from 'node:path'
 import { copyFile, readFile, unlink, writeFile } from 'node:fs/promises'
 
 import { templates } from '../src/templates.js'
+import { databases } from '../src/databases.js'
 
 /**
  * Creates a new AdonisJS application and configures it
@@ -89,7 +90,6 @@ export class CreateNewApp extends BaseCommand {
    */
   @flags.string({
     description: 'Define the database dialect to use with Lucid',
-    default: 'sqlite',
   })
   declare db?: string
 
@@ -193,6 +193,22 @@ export class CreateNewApp extends BaseCommand {
       if (matchingTemplatingFromAlias) {
         this.kit = matchingTemplatingFromAlias.source
       }
+    }
+  }
+
+  /**
+   * Prompt to select a database driver
+   */
+  async #promptForDatabaseDriver() {
+    if (!this.db) {
+      /**
+       * Display prompt when "db" flag is not used.
+       */
+      const template = await this.prompt.choice(
+        'Select the database driver you want to use',
+        databases
+      )
+      this.db = databases.find((t) => t.name === template)!.alias
     }
   }
 
@@ -338,6 +354,12 @@ export class CreateNewApp extends BaseCommand {
      */
     await this.#promptForDestination()
     await this.#promptForStarterKit()
+    if (
+      this.kit === 'github:adonisjs/web-starter-kit' ||
+      this.kit === 'github:adonisjs/api-starter-kit'
+    ) {
+      await this.#promptForDatabaseDriver()
+    }
     await this.#promptForInstallingDeps()
 
     /**
@@ -353,6 +375,7 @@ export class CreateNewApp extends BaseCommand {
     const configureLucid =
       (this.kit === 'github:adonisjs/web-starter-kit' ||
         this.kit === 'github:adonisjs/api-starter-kit') &&
+      this.db !== undefined &&
       this.install !== false
 
     /**

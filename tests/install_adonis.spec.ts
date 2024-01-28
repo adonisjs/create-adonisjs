@@ -13,6 +13,8 @@ import { test } from '@japa/runner'
 
 import { kernel } from '../index.js'
 import { CreateNewApp } from '../commands/main.js'
+import { databases } from '../src/databases.js'
+import { authGuards } from '../src/auth_guards.js'
 
 const VERBOSE = !!process.env.CI
 
@@ -144,6 +146,57 @@ test.group('Create new app', (group) => {
 
     assert.deepEqual(result.exitCode, 0)
     assert.deepInclude(result.stdout, 'View list of available commands')
+  })
+
+  test('do not configure lucid when user skip database driver selection', async ({
+    assert,
+    fs,
+  }) => {
+    const command = await kernel.create(CreateNewApp, [
+      join(fs.basePath, 'foo'),
+      '--pkg="npm"',
+      '--install',
+      '-K=web',
+      '--auth-guard=session',
+    ])
+
+    command.verbose = VERBOSE
+
+    const skippingIndex = databases.findIndex((db) => db.alias === undefined)
+    command.prompt.trap('Select the database driver you want to use').chooseOption(skippingIndex)
+
+    await command.exec()
+
+    const result = await execa('node', ['ace', '--help'], { cwd: join(fs.basePath, 'foo') })
+    assert.deepEqual(result.exitCode, 0)
+    assert.deepInclude(result.stdout, 'View list of available commands')
+
+    await assert.fileNotExists('foo/config/database.ts')
+  })
+
+  test('do not configure auth when user skip auth guard selection', async ({ assert, fs }) => {
+    const command = await kernel.create(CreateNewApp, [
+      join(fs.basePath, 'foo'),
+      '--pkg="npm"',
+      '--install',
+      '-K=web',
+      '--db=sqlite',
+    ])
+
+    command.verbose = VERBOSE
+
+    const skippingIndex = authGuards.findIndex((db) => db.alias === undefined)
+    command.prompt
+      .trap('Select the authentication guard you want to use')
+      .chooseOption(skippingIndex)
+
+    await command.exec()
+
+    const result = await execa('node', ['ace', '--help'], { cwd: join(fs.basePath, 'foo') })
+    assert.deepEqual(result.exitCode, 0)
+    assert.deepInclude(result.stdout, 'View list of available commands')
+
+    await assert.fileNotExists('foo/config/auth.ts')
   })
 
   test('fail if destination directory already exists', async ({ assert, fs }) => {

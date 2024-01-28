@@ -100,6 +100,8 @@ test.group('Create new app', (group) => {
 
     assert.deepEqual(result.exitCode, 0)
     assert.deepInclude(result.stdout, 'View list of available commands')
+
+    await assert.fileExists('foo/config/auth.ts')
   })
 
   test('prompt for database driver when not pre-defined and selected api/web kit', async ({
@@ -123,6 +125,8 @@ test.group('Create new app', (group) => {
 
     assert.deepEqual(result.exitCode, 0)
     assert.deepInclude(result.stdout, 'View list of available commands')
+
+    await assert.fileExists('foo/config/database.ts')
   })
 
   test('prompt for install dependencies when --install flag is not used', async ({

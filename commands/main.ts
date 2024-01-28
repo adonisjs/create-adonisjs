@@ -367,7 +367,11 @@ export class CreateNewApp extends BaseCommand {
     tasks
       .add('Download starter kit', async (task) => {
         task.update(`Downloading "${this.kit}"`)
-        await downloadTemplate(this.kit!, { dir: this.destination, auth: this.token })
+        await downloadTemplate(this.kit!, {
+          dir: this.destination,
+          auth: this.token,
+          registry: false,
+        })
         await this.#removeLockFile()
         return `Downloaded "${this.kit}"`
       })

@@ -46,7 +46,11 @@ This argument is optional and the command will prompt you to enter the directory
 If you want to use your own starter kit hosted on Github, Gitlab, or Bitbucket, you can use the `--kit` flag to define the repo URL.
 
 ```sh
+# Download from GitHub
 npm init adonisjs -- --kit="github:github_user/repo"
+
+# Github is the default provider, so if not specified, it will be assumed as github
+npm init adonisjs -- --kit="github_user/repo"
 
 # Download from GitLab
 npm init adonisjs -- --kit="gitlab:user/repo"

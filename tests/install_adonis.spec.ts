@@ -40,6 +40,20 @@ test.group('Create new app', (group) => {
     await assert.fileExists('foo/package.json')
   })
 
+  test('use github as default provider', async ({ assert, fs }) => {
+    const command = await kernel.create(CreateNewApp, [
+      join(fs.basePath, 'foo'),
+      '--no-install',
+      '--kit="samuelmarina/is-even"',
+    ])
+
+    command.verbose = VERBOSE
+    await command.exec()
+
+    await assert.dirIsNotEmpty('foo')
+    await assert.fileExists('foo/package.json')
+  })
+
   test('prompt for destination when not provided', async ({ assert }) => {
     const command = await kernel.create(CreateNewApp, [
       '--no-install',

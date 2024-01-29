@@ -19,6 +19,8 @@ import { basename, isAbsolute, join, relative } from 'node:path'
 import { copyFile, readFile, unlink, writeFile } from 'node:fs/promises'
 
 import { templates } from '../src/templates.js'
+import { databases } from '../src/databases.js'
+import { authGuards } from '../src/auth_guards.js'
 
 /**
  * Creates a new AdonisJS application and configures it
@@ -89,16 +91,14 @@ export class CreateNewApp extends BaseCommand {
    */
   @flags.string({
     description: 'Define the database dialect to use with Lucid',
-    default: 'sqlite',
   })
   declare db?: string
 
   /**
-   * Auth guard for auth package. Defaults to "session"
+   * Auth guard for auth package.
    */
   @flags.string({
     description: 'Define the authentication guard for the Auth package',
-    default: 'session',
   })
   declare authGuard?: string
 
@@ -197,6 +197,38 @@ export class CreateNewApp extends BaseCommand {
   }
 
   /**
+   * Prompt to select a database driver
+   */
+  async #promptForDatabaseDriver() {
+    if (!this.db) {
+      /**
+       * Display prompt when "db" flag is not used.
+       */
+      const database = await this.prompt.choice(
+        'Select the database driver you want to use',
+        databases
+      )
+      this.db = databases.find((t) => t.name === database)!.alias
+    }
+  }
+
+  /**
+   * Prompt to select a auth guard
+   */
+  async #promptForAuthGuard() {
+    if (!this.authGuard) {
+      /**
+       * Display prompt when "authGuard" flag is not used.
+       */
+      const guard = await this.prompt.choice(
+        'Select the authentication guard you want to use',
+        authGuards
+      )
+      this.authGuard = authGuards.find((t) => t.name === guard)!.alias
+    }
+  }
+
+  /**
    * Prompt to check if we should install dependencies?
    */
   async #promptForInstallingDeps() {
@@ -205,6 +237,7 @@ export class CreateNewApp extends BaseCommand {
         `Do you want us to install dependencies using "${this.packageManager}"?`,
         {
           default: true,
+          hint: "(If not, you'll need to configure guards and database manually)",
         }
       )
     }
@@ -338,6 +371,13 @@ export class CreateNewApp extends BaseCommand {
      */
     await this.#promptForDestination()
     await this.#promptForStarterKit()
+    if (
+      this.kit === 'github:adonisjs/web-starter-kit' ||
+      this.kit === 'github:adonisjs/api-starter-kit'
+    ) {
+      await this.#promptForAuthGuard()
+      await this.#promptForDatabaseDriver()
+    }
     await this.#promptForInstallingDeps()
 
     /**
@@ -353,6 +393,7 @@ export class CreateNewApp extends BaseCommand {
     const configureLucid =
       (this.kit === 'github:adonisjs/web-starter-kit' ||
         this.kit === 'github:adonisjs/api-starter-kit') &&
+      this.db !== undefined &&
       this.install !== false
 
     /**
@@ -362,6 +403,7 @@ export class CreateNewApp extends BaseCommand {
     const configureAuth =
       (this.kit === 'github:adonisjs/web-starter-kit' ||
         this.kit === 'github:adonisjs/api-starter-kit') &&
+      this.authGuard !== undefined &&
       this.install !== false
 
     tasks

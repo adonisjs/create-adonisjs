@@ -13,6 +13,8 @@ import { test } from '@japa/runner'
 
 import { kernel } from '../index.js'
 import { CreateNewApp } from '../commands/main.js'
+import { databases } from '../src/databases.js'
+import { authGuards } from '../src/auth_guards.js'
 
 const VERBOSE = !!process.env.CI
 
@@ -30,6 +32,8 @@ test.group('Create new app', (group) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
       '--no-install',
+      '--db=sqlite',
+      '--auth-guard=session',
       '--kit="github:samuelmarina/is-even"',
     ])
 
@@ -57,6 +61,8 @@ test.group('Create new app', (group) => {
   test('prompt for destination when not provided', async ({ assert }) => {
     const command = await kernel.create(CreateNewApp, [
       '--no-install',
+      '--db=sqlite',
+      '--auth-guard=session',
       '--kit="github:samuelmarina/is-even"',
     ])
 
@@ -73,6 +79,7 @@ test.group('Create new app', (group) => {
       join(fs.basePath, 'foo'),
       '--pkg="npm"',
       '--install',
+      // not provide `--db` and `--auth-guard` to test that it will not prompt for slim kit
     ])
 
     command.verbose = VERBOSE
@@ -86,6 +93,56 @@ test.group('Create new app', (group) => {
     assert.deepInclude(result.stdout, 'View list of available commands')
   })
 
+  test('prompt for auth guard when not pre-defined and selected api/web kit', async ({
+    assert,
+    fs,
+  }) => {
+    const command = await kernel.create(CreateNewApp, [
+      join(fs.basePath, 'foo'),
+      '--pkg="npm"',
+      '-K=web',
+      '--db=sqlite',
+      '--install',
+    ])
+
+    command.verbose = VERBOSE
+    command.prompt.trap('Select the authentication guard you want to use').chooseOption(1)
+
+    await command.exec()
+
+    const result = await execa('node', ['ace', '--help'], { cwd: join(fs.basePath, 'foo') })
+
+    assert.deepEqual(result.exitCode, 0)
+    assert.deepInclude(result.stdout, 'View list of available commands')
+
+    await assert.fileExists('foo/config/auth.ts')
+  })
+
+  test('prompt for database driver when not pre-defined and selected api/web kit', async ({
+    assert,
+    fs,
+  }) => {
+    const command = await kernel.create(CreateNewApp, [
+      join(fs.basePath, 'foo'),
+      '--pkg="npm"',
+      '-K=api',
+      '--auth-guard=session',
+      '--install',
+    ])
+
+    command.verbose = VERBOSE
+    command.prompt.trap('Select the database driver you want to use').chooseOption(1)
+
+    await command.exec()
+
+    const result = await execa('node', ['ace', '--help'], { cwd: join(fs.basePath, 'foo') })
+
+    assert.deepEqual(result.exitCode, 0)
+    assert.deepInclude(result.stdout, 'View list of available commands')
+
+    await assert.fileExists('foo/config/database.ts')
+  })
+
   test('prompt for install dependencies when --install flag is not used', async ({
     assert,
     fs,
@@ -93,6 +150,8 @@ test.group('Create new app', (group) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
       '--pkg="npm"',
+      '--db=sqlite',
+      '--auth-guard=session',
       '-K=slim',
     ])
 
@@ -105,6 +164,57 @@ test.group('Create new app', (group) => {
 
     assert.deepEqual(result.exitCode, 0)
     assert.deepInclude(result.stdout, 'View list of available commands')
+  })
+
+  test('do not configure lucid when user skip database driver selection', async ({
+    assert,
+    fs,
+  }) => {
+    const command = await kernel.create(CreateNewApp, [
+      join(fs.basePath, 'foo'),
+      '--pkg="npm"',
+      '--install',
+      '-K=web',
+      '--auth-guard=session',
+    ])
+
+    command.verbose = VERBOSE
+
+    const skippingIndex = databases.findIndex((db) => db.alias === undefined)
+    command.prompt.trap('Select the database driver you want to use').chooseOption(skippingIndex)
+
+    await command.exec()
+
+    const result = await execa('node', ['ace', '--help'], { cwd: join(fs.basePath, 'foo') })
+    assert.deepEqual(result.exitCode, 0)
+    assert.deepInclude(result.stdout, 'View list of available commands')
+
+    await assert.fileNotExists('foo/config/database.ts')
+  })
+
+  test('do not configure auth when user skip auth guard selection', async ({ assert, fs }) => {
+    const command = await kernel.create(CreateNewApp, [
+      join(fs.basePath, 'foo'),
+      '--pkg="npm"',
+      '--install',
+      '-K=web',
+      '--db=sqlite',
+    ])
+
+    command.verbose = VERBOSE
+
+    const skippingIndex = authGuards.findIndex((db) => db.alias === undefined)
+    command.prompt
+      .trap('Select the authentication guard you want to use')
+      .chooseOption(skippingIndex)
+
+    await command.exec()
+
+    const result = await execa('node', ['ace', '--help'], { cwd: join(fs.basePath, 'foo') })
+    assert.deepEqual(result.exitCode, 0)
+    assert.deepInclude(result.stdout, 'View list of available commands')
+
+    await assert.fileNotExists('foo/config/auth.ts')
   })
 
   test('fail if destination directory already exists', async ({ assert, fs }) => {
@@ -138,6 +248,8 @@ test.group('Create new app', (group) => {
       const command = await kernel.create(CreateNewApp, [
         join(fs.basePath, 'foo'),
         '--install',
+        '--db=sqlite',
+        '--auth-guard=session',
         '--kit="github:samuelmarina/is-even"',
       ])
 
@@ -152,6 +264,8 @@ test.group('Create new app', (group) => {
   test('do not install dependencies when --no-install flag is provided', async ({ assert, fs }) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
+      '--db=sqlite',
+      '--auth-guard=session',
       '--no-install',
       '--kit="github:samuelmarina/is-even"',
     ])
@@ -180,6 +294,8 @@ test.group('Create new app', (group) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
       '--pkg="yarn"',
+      '--db=sqlite',
+      '--auth-guard=session',
       '--install',
       '--kit="github:samuelmarina/is-even"',
     ])
@@ -269,6 +385,8 @@ test.group('Configure | Web starter kit', (group) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
       '--pkg="npm"',
+      '--db=sqlite',
+      '--auth-guard=session',
       '--install',
       '-K=web',
     ])
@@ -303,6 +421,7 @@ test.group('Configure | Web starter kit', (group) => {
       '--pkg="npm"',
       '--install',
       '-K=web',
+      '--auth-guard=session',
       '--db=postgres',
     ])
 
@@ -327,6 +446,8 @@ test.group('Configure | API starter kit', (group) => {
       '--pkg="npm"',
       '--install',
       '-K=api',
+      '--db=sqlite',
+      '--auth-guard=session',
     ])
 
     command.verbose = VERBOSE
@@ -368,6 +489,7 @@ test.group('Configure | API starter kit', (group) => {
       '--pkg="npm"',
       '--install',
       '-K=api',
+      '--db=sqlite',
       '--auth-guard=access_tokens',
     ])
 

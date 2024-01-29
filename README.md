@@ -85,22 +85,22 @@ We are trying to detect the package manager used by your project. However, if yo
 npm init adonisjs -- --pkg="yarn"
 ```
 
-### `--auth-guard` (Default: session)
+### `--auth-guard` (Default: Triggers prompt for selection)
 
 Specify a custom auth guard to use when using the `api` stater kit. One of the following options are allowed
 
-- `session` (Default)
+- `session`
 - `access_tokens`
 
 ```sh
 npm init adonisjs -- --kit="api" --auth-guard="access_tokens"
 ```
 
-### `--db` (Default: sqlite)
+### `--db` (Default: Triggers prompt for selection)
 
 Specify the database dialect to configure with Lucid. One of the following options are allowd.
 
-- `sqlite` (Default)
+- `sqlite`
 - `mysql`
 - `mssql`
 - `postgres`

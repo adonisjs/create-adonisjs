@@ -510,3 +510,55 @@ test.group('Configure | API starter kit', (group) => {
     await assert.fileNotContains('foo/package.json', ['@adonisjs/session'])
   })
 })
+
+test.group('Configure | Inertia Starter Kit', (group) => {
+  group.each.disableTimeout()
+
+  test('configure lucid/auth/inertia when using inertia starter kit', async ({ assert, fs }) => {
+    const command = await kernel.create(CreateNewApp, [
+      join(fs.basePath, 'foo'),
+      '--pkg="npm"',
+      '--install',
+      '-K=inertia',
+      '--db=sqlite',
+      '--auth-guard=session',
+      '--ssr',
+      '--adapter=solid',
+    ])
+
+    command.verbose = VERBOSE
+    await command.exec()
+
+    const result = await execa('node', ['ace', '--help'], { cwd: join(fs.basePath, 'foo') })
+    assert.deepEqual(result.exitCode, 0)
+    assert.deepInclude(result.stdout, 'View list of available commands')
+
+    await assert.fileContains('foo/adonisrc.ts', [
+      `() => import('@adonisjs/lucid/database_provider')`,
+      `() => import('@adonisjs/auth/auth_provider')`,
+      `() => import('@adonisjs/session/session_provider')`,
+      `() => import('@adonisjs/lucid/commands')`,
+    ])
+    await assert.fileContains('foo/start/kernel.ts', [
+      `() => import('@adonisjs/session/session_middleware')`,
+    ])
+    await assert.fileExists('foo/config/database.ts')
+    await assert.fileExists('foo/config/auth.ts')
+    await assert.fileExists('foo/resources/app.tsx')
+    await assert.fileExists('foo/resources/ssr.tsx')
+    await assert.fileExists('foo/config/inertia.ts')
+    await assert.fileExists('foo/config/session.ts')
+    await assert.fileExists('foo/app/models/user.ts')
+    await assert.fileContains('foo/package.json', [
+      '@adonisjs/session',
+      '@adonisjs/lucid',
+      '@adonisjs/inertia',
+      'solid-js',
+      'vite-plugin-solid',
+      '@adonisjs/auth',
+      'luxon',
+      '@types/luxon',
+      'better-sqlite',
+    ])
+  })
+})

@@ -21,6 +21,11 @@ import { copyFile, readFile, unlink, writeFile } from 'node:fs/promises'
 import { templates } from '../src/templates.js'
 import { databases } from '../src/databases.js'
 import { authGuards } from '../src/auth_guards.js'
+import { adapters } from '../src/inertia_adapters.js'
+
+const API_STARTER_KIT = 'github:adonisjs/api-starter-kit'
+const WEB_STARTER_KIT = 'github:adonisjs/web-starter-kit'
+const INERTIA_STARTER_KIT = 'github:adonisjs/inertia-starter-kit'
 
 /**
  * Creates a new AdonisJS application and configures it
@@ -101,6 +106,22 @@ export class CreateNewApp extends BaseCommand {
     description: 'Define the authentication guard for the Auth package',
   })
   declare authGuard?: string
+
+  /**
+   * Inertia adapter to use
+   */
+  @flags.string({
+    description: 'Define the Inertia frontend adapter ( if using Inertia starter kit )',
+  })
+  declare adapter?: string
+
+  /**
+   * Inertia adapter to use
+   */
+  @flags.boolean({
+    description: 'Define if SSR is needed ( if using Inertia starter kit )',
+  })
+  declare ssr?: boolean
 
   /**
    * Execute tasks in verbose mode. Defaults to false.
@@ -229,6 +250,30 @@ export class CreateNewApp extends BaseCommand {
   }
 
   /**
+   * Prompt to select the Inertia adapter
+   */
+  async #promptForInertiaAdapter() {
+    if (!this.adapter) {
+      const adapter = await this.prompt.choice(
+        'Select the Inertia frontend adapter you want to use',
+        adapters
+      )
+      this.adapter = adapters.find((t) => t.name === adapter)!.alias
+    }
+  }
+
+  /**
+   * Prompt to select the Inertia adapter
+   */
+  async #promptForInertiaSsr() {
+    if (this.ssr === undefined) {
+      this.ssr = await this.prompt.confirm(
+        'Do you want to setup server-side rendering with Inertia?'
+      )
+    }
+  }
+
+  /**
    * Prompt to check if we should install dependencies?
    */
   async #promptForInstallingDeps() {
@@ -340,7 +385,7 @@ export class CreateNewApp extends BaseCommand {
      * guard. This needs to be done, since the api starter kit does
      * not install the session package by default.
      */
-    if (this.authGuard === 'session' && this.kit === 'github:adonisjs/api-starter-kit') {
+    if (this.authGuard === 'session' && this.kit === API_STARTER_KIT) {
       await this.#configureSession()
     }
 
@@ -348,6 +393,29 @@ export class CreateNewApp extends BaseCommand {
      * Next configure the auth package
      */
     const argv = ['ace', 'configure', '@adonisjs/auth', '--guard', this.authGuard]
+    if (this.verbose) {
+      argv.push('--verbose')
+    }
+
+    await this.#runBashCommand('node', argv)
+  }
+
+  /**
+   * Configures the Inertia package
+   */
+  async #configureInertia() {
+    this.adapter = this.adapter || 'vue'
+
+    const argv = [
+      'ace',
+      'configure',
+      '@adonisjs/inertia',
+      '--adapter',
+      this.adapter,
+      this.ssr ? '--ssr' : '--no-ssr',
+      this.install ? '--install' : '--no-install',
+    ]
+
     if (this.verbose) {
       argv.push('--verbose')
     }
@@ -372,12 +440,18 @@ export class CreateNewApp extends BaseCommand {
     await this.#promptForDestination()
     await this.#promptForStarterKit()
     if (
-      this.kit === 'github:adonisjs/web-starter-kit' ||
-      this.kit === 'github:adonisjs/api-starter-kit'
+      this.kit === WEB_STARTER_KIT ||
+      this.kit === API_STARTER_KIT ||
+      this.kit === INERTIA_STARTER_KIT
     ) {
       await this.#promptForAuthGuard()
       await this.#promptForDatabaseDriver()
     }
+    if (this.kit === INERTIA_STARTER_KIT) {
+      await this.#promptForInertiaAdapter()
+      await this.#promptForInertiaSsr()
+    }
+
     await this.#promptForInstallingDeps()
 
     /**
@@ -387,24 +461,28 @@ export class CreateNewApp extends BaseCommand {
     const tasks = this.ui.tasks({ verbose: this.verbose === true })
 
     /**
-     * Configure lucid when using web or api starter kits
+     * Configure lucid when using our own starter kits
      * and installing dependencies
      */
     const configureLucid =
-      (this.kit === 'github:adonisjs/web-starter-kit' ||
-        this.kit === 'github:adonisjs/api-starter-kit') &&
+      [WEB_STARTER_KIT, API_STARTER_KIT, INERTIA_STARTER_KIT].includes(this.kit || '') &&
       this.db !== undefined &&
       this.install !== false
 
     /**
-     * Configure auth when using web or api starter kits
+     * Configure auth when using our own starter kits
      * and installing dependencies
      */
     const configureAuth =
-      (this.kit === 'github:adonisjs/web-starter-kit' ||
-        this.kit === 'github:adonisjs/api-starter-kit') &&
+      [WEB_STARTER_KIT, API_STARTER_KIT, INERTIA_STARTER_KIT].includes(this.kit || '') &&
       this.authGuard !== undefined &&
       this.install !== false
+
+    /**
+     * Configure inertia when using our inertia starter kit
+     */
+    const configureInertia =
+      this.kit === INERTIA_STARTER_KIT && this.db !== undefined && this.install !== false
 
     tasks
       .add('Download starter kit', async (task) => {
@@ -489,6 +567,28 @@ export class CreateNewApp extends BaseCommand {
             this.logger.fatal(error)
           }
           return `Unable to configure "@adonisjs/auth"`
+        }
+      })
+      .addIf(configureInertia, 'Configure Inertia', async (task) => {
+        const spinner = this.logger.await('configuring @adonisjs/inertia', {
+          silent: this.verbose,
+        })
+
+        spinner.tap((line) => task.update(line))
+        spinner.start()
+
+        try {
+          await this.#configureInertia()
+          spinner.stop()
+          return 'Inertia configured'
+        } catch (error) {
+          spinner.stop()
+
+          if (this.verbose) {
+            this.logger.fatal(error)
+          }
+
+          return `Unable to configure "@adonisjs/inertia"`
         }
       })
 

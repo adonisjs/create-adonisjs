@@ -13,6 +13,7 @@ You can use between one of the following official starter kits, or bring your ow
 - `api` : AdonisJS application tailored for building HTTP APIs.
 - `web` : AdonisJS application tailored for building server-side rendered applications.
 - `slim` : Smallest possible AdonisJS application. Still way more powerful and batteries included than a express application.
+- `inertia`: AdonisJS application tailored for building applications using InertiaJS and your favorite frontend framework (Vue, React, Svelte, Solid).
 
 ## Usage
 

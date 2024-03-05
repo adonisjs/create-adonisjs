@@ -29,4 +29,10 @@ export const templates = [
     hint: 'AdonisJS app tailored for creating JSON APIs',
     source: 'github:adonisjs/api-starter-kit',
   },
+  {
+    name: 'Inertia Starter Kit',
+    alias: 'inertia',
+    hint: 'AdonisJS app with Inertia.JS and your favorite frontend framework',
+    source: 'github:adonisjs/inertia-starter-kit',
+  },
 ]

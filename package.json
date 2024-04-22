@@ -30,7 +30,7 @@
     "test": "c8 npm run quick:test",
     "prebuild": "npm run lint && npm run clean",
     "build": "tsc",
-    "release": "np",
+    "release": "release-it",
     "version": "npm run build",
     "prepublishOnly": "npm run build"
   },
@@ -49,8 +49,8 @@
     "copyfiles": "^2.4.1",
     "del-cli": "^5.0.0",
     "eslint": "^8.56.0",
-    "np": "^10.0.5",
     "prettier": "^3.2.5",
+    "release-it": "^17.2.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
   },
@@ -87,12 +87,6 @@
     "access": "public",
     "tag": "latest"
   },
-  "np": {
-    "message": "chore(release): %s",
-    "tag": "latest",
-    "branch": "main",
-    "anyBranch": false
-  },
   "c8": {
     "reporter": [
       "text",
@@ -103,5 +97,22 @@
       "tmp/**",
       "bin/**"
     ]
+  },
+  "release-it": {
+    "git": {
+      "commitMessage": "chore(release): ${version}",
+      "tagAnnotation": "v${version}",
+      "tagName": "v${version}"
+    },
+    "hooks": {
+      "before:init": [
+        "npm test"
+      ]
+    },
+    "github": {
+      "release": true,
+      "releaseName": "v${version}",
+      "web": true
+    }
   }
 }

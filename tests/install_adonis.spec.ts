@@ -67,7 +67,7 @@ test.group('Create new app', (group) => {
     ])
 
     command.verbose = VERBOSE
-    command.prompt.trap('Where should we create your new project?').replyWith('tmp/foo')
+    command.prompt.trap('Where should we create your new project').replyWith('tmp/foo')
     await command.exec()
 
     await assert.dirIsNotEmpty('foo')
@@ -83,7 +83,7 @@ test.group('Create new app', (group) => {
     ])
 
     command.verbose = VERBOSE
-    command.prompt.trap('Which starter kit would you like to use?').chooseOption(0)
+    command.prompt.trap('Which starter kit would you like to use').chooseOption(0)
 
     await command.exec()
 
@@ -106,7 +106,7 @@ test.group('Create new app', (group) => {
     ])
 
     command.verbose = VERBOSE
-    command.prompt.trap('Select the authentication guard you want to use').chooseOption(1)
+    command.prompt.trap('Which authentication guard you want to use').chooseOption(1)
 
     await command.exec()
 
@@ -131,7 +131,7 @@ test.group('Create new app', (group) => {
     ])
 
     command.verbose = VERBOSE
-    command.prompt.trap('Select the database driver you want to use').chooseOption(1)
+    command.prompt.trap('Which database driver you want to use').chooseOption(1)
 
     await command.exec()
 
@@ -156,7 +156,7 @@ test.group('Create new app', (group) => {
     ])
 
     command.verbose = VERBOSE
-    command.prompt.trap('Do you want us to install dependencies using "npm"?').replyWith(true)
+    command.prompt.trap('Do you want to install dependencies using "npm"').replyWith(true)
 
     await command.exec()
 
@@ -181,7 +181,7 @@ test.group('Create new app', (group) => {
     command.verbose = VERBOSE
 
     const skippingIndex = databases.findIndex((db) => db.name === 'skip')
-    command.prompt.trap('Select the database driver you want to use').chooseOption(skippingIndex)
+    command.prompt.trap('Which database driver you want to use').chooseOption(skippingIndex)
 
     await command.exec()
 
@@ -204,9 +204,7 @@ test.group('Create new app', (group) => {
     command.verbose = VERBOSE
 
     const skippingIndex = authGuards.findIndex((db) => db.name === 'skip')
-    command.prompt
-      .trap('Select the authentication guard you want to use')
-      .chooseOption(skippingIndex)
+    command.prompt.trap('Which authentication guard you want to use').chooseOption(skippingIndex)
 
     await command.exec()
 

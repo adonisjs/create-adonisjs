@@ -7,29 +7,21 @@
  * file that was distributed with this source code.
  */
 
+import { DIALECTS } from '@adonisjs/presets/lucid'
+
 /**
- * List of first party databases (lucid)
+ * List of known databases that can be used with Lucid
  */
 export const databases = [
+  ...Object.keys(DIALECTS).map((dialect) => {
+    return {
+      name: dialect as keyof typeof DIALECTS,
+      message: DIALECTS[dialect as keyof typeof DIALECTS].name,
+    }
+  }),
   {
-    name: 'SQLite',
-    alias: 'sqlite',
-  },
-  {
-    name: 'MySQL / MariaDB',
-    alias: 'mysql',
-  },
-  {
-    name: 'PostgreSQL',
-    alias: 'postgres',
-  },
-  {
-    name: 'Microsoft SQL Server',
-    alias: 'mssql',
-  },
-  {
-    name: 'Skip',
-    hint: 'I want to configures the Lucid package by myself.',
-    alias: undefined,
+    name: 'skip',
+    message: 'Skip',
+    hint: 'I want to configure Lucid manually',
   },
 ]

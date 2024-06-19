@@ -2,6 +2,9 @@
   "name": "create-adonisjs",
   "description": "Scaffold new AdonisJS applications using starter kits",
   "version": "2.2.1",
+  "engines": {
+    "node": ">=18.16.0"
+  },
   "main": "build/index.js",
   "type": "module",
   "files": [
@@ -16,9 +19,6 @@
   },
   "exports": {
     ".": "./build/index.js"
-  },
-  "engines": {
-    "node": ">=18.16.0"
   },
   "scripts": {
     "clean": "del-cli build",
@@ -55,7 +55,8 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "@adonisjs/ace": "^13.0.1",
+    "@adonisjs/ace": "^13.1.0",
+    "@adonisjs/presets": "^2.6.1",
     "@antfu/install-pkg": "^0.3.3",
     "execa": "^9.2.0",
     "giget": "^1.2.3",
@@ -64,13 +65,7 @@
   },
   "author": "julien-r44,virk",
   "license": "MIT",
-  "keywords": [
-    "adonisjs",
-    "create-adonisjs-app"
-  ],
-  "directories": {
-    "test": "tests"
-  },
+  "homepage": "https://github.com/adonisjs/create-adonisjs#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/adonisjs/create-adonisjs.git"
@@ -78,7 +73,13 @@
   "bugs": {
     "url": "https://github.com/adonisjs/create-adonisjs/issues"
   },
-  "homepage": "https://github.com/adonisjs/create-adonisjs#readme",
+  "keywords": [
+    "adonisjs",
+    "create-adonisjs-app"
+  ],
+  "directories": {
+    "test": "tests"
+  },
   "eslintConfig": {
     "extends": "@adonisjs/eslint-config/package"
   },

@@ -32,7 +32,7 @@ export const templates = [
   {
     name: 'Inertia Starter Kit',
     alias: 'inertia',
-    hint: 'AdonisJS app with Inertia.JS and your favorite frontend framework',
+    hint: 'Inertia app with a frontend framework of your choice',
     source: 'github:adonisjs/inertia-starter-kit',
   },
 ]

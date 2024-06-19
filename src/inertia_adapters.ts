@@ -12,24 +12,24 @@
  */
 export const adapters = [
   {
-    name: 'Vue 3',
-    alias: 'vue',
+    message: 'Vue 3',
+    name: 'vue',
   },
   {
-    name: 'React',
-    alias: 'react',
+    message: 'React',
+    name: 'react',
   },
   {
-    name: 'Svelte',
-    alias: 'svelte',
+    message: 'Svelte',
+    name: 'svelte',
   },
   {
-    name: 'Solid.js',
-    alias: 'solid',
+    message: 'Solid.js',
+    name: 'solid',
   },
   {
-    name: 'Skip',
-    hint: 'I want to configure Inertia by myself.',
-    alias: undefined,
+    name: 'skip',
+    message: 'Skip',
+    hint: 'I want to configure Interia manually',
   },
 ]

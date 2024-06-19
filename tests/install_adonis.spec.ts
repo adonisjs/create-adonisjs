@@ -180,7 +180,7 @@ test.group('Create new app', (group) => {
 
     command.verbose = VERBOSE
 
-    const skippingIndex = databases.findIndex((db) => db.alias === undefined)
+    const skippingIndex = databases.findIndex((db) => db.name === 'skip')
     command.prompt.trap('Select the database driver you want to use').chooseOption(skippingIndex)
 
     await command.exec()
@@ -203,7 +203,7 @@ test.group('Create new app', (group) => {
 
     command.verbose = VERBOSE
 
-    const skippingIndex = authGuards.findIndex((db) => db.alias === undefined)
+    const skippingIndex = authGuards.findIndex((db) => db.name === 'skip')
     command.prompt
       .trap('Select the authentication guard you want to use')
       .chooseOption(skippingIndex)

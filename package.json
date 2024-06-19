@@ -105,11 +105,6 @@
       "tagAnnotation": "v${version}",
       "tagName": "v${version}"
     },
-    "hooks": {
-      "before:init": [
-        "npm test"
-      ]
-    },
     "github": {
       "release": true,
       "releaseName": "v${version}",

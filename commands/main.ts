@@ -313,10 +313,9 @@ export class CreateNewApp extends BaseCommand {
    */
   async #removeLockFile() {
     await Promise.allSettled([
-      unlink(join(this.destination, 'bun.lockb')),
       unlink(join(this.destination, 'package-lock.json')),
-      unlink(join(this.destination, 'pnpm-lock.yaml')),
       unlink(join(this.destination, 'yarn.lock')),
+      unlink(join(this.destination, 'pnpm-lock.yaml')),
     ])
   }
 

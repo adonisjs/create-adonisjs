@@ -64,16 +64,6 @@ export class CreateNewApp extends BaseCommand {
   declare token?: string
 
   /**
-   * Auto install packages after creating the project. Display prompt
-   * when flag is not mentioned.
-   */
-  @flags.boolean({
-    description: 'Force install or skip dependencies installation',
-    showNegatedVariantInHelp: true,
-  })
-  declare install?: boolean
-
-  /**
    * Init git repository. Do not init when flag is not mentioned.
    */
   @flags.boolean({
@@ -271,20 +261,6 @@ export class CreateNewApp extends BaseCommand {
   }
 
   /**
-   * Prompt to check if we should install dependencies?
-   */
-  async #promptForInstallingDeps() {
-    if (this.install === undefined) {
-      this.install = await this.prompt.confirm(
-        `Do you want to install dependencies using "${this.packageManager}"`,
-        {
-          default: true,
-        }
-      )
-    }
-  }
-
-  /**
    * Replace the package.json name with the destination directory name.
    * Errors are ignored.
    */
@@ -331,10 +307,6 @@ export class CreateNewApp extends BaseCommand {
    * Generate a fresh app key. Errors are ignored
    */
   async #generateFreshAppKey() {
-    if (this.install === false) {
-      return
-    }
-
     await this.#runBashCommand('node', ['ace', 'generate:key'])
   }
 
@@ -403,7 +375,6 @@ export class CreateNewApp extends BaseCommand {
       '--adapter',
       this.adapter!,
       this.ssr ? '--ssr' : '--no-ssr',
-      this.install ? '--install' : '--no-install',
     ]
 
     if (this.verbose) {
@@ -442,8 +413,6 @@ export class CreateNewApp extends BaseCommand {
       await this.#promptForInertiaSsr()
     }
 
-    await this.#promptForInstallingDeps()
-
     /**
      * Create tasks instance for displaying
      * actions as tasks
@@ -456,8 +425,7 @@ export class CreateNewApp extends BaseCommand {
      */
     const configureLucid =
       [WEB_STARTER_KIT, API_STARTER_KIT, INERTIA_STARTER_KIT].includes(this.kit || '') &&
-      this.db !== 'skip' &&
-      this.install !== false
+      this.db !== 'skip'
 
     /**
      * Configure auth when using our own starter kits
@@ -465,14 +433,12 @@ export class CreateNewApp extends BaseCommand {
      */
     const configureAuth =
       [WEB_STARTER_KIT, API_STARTER_KIT, INERTIA_STARTER_KIT].includes(this.kit || '') &&
-      this.authGuard !== 'skip' &&
-      this.install !== false
+      this.authGuard !== 'skip'
 
     /**
      * Configure inertia when using our inertia starter kit
      */
-    const configureInertia =
-      this.kit === INERTIA_STARTER_KIT && this.adapter !== 'skip' && this.install !== false
+    const configureInertia = this.kit === INERTIA_STARTER_KIT && this.adapter !== 'skip'
 
     tasks
       .add('Download starter kit', async (task) => {
@@ -489,7 +455,7 @@ export class CreateNewApp extends BaseCommand {
         await this.#runBashCommand('git', ['init'])
         return 'Initialized git repository'
       })
-      .addIf(this.install !== false, 'Install packages', async (task) => {
+      .add('Install packages', async (task) => {
         const spinner = this.logger.await('installing dependencies', {
           silent: this.verbose,
         })

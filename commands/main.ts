@@ -282,7 +282,7 @@ export class CreateNewApp extends BaseCommand {
         `Do you want us to install dependencies using "${this.packageManager}"?`,
         {
           default: true,
-          hint: "(If not, you'll need to configure guards and database manually)",
+          hint: "(If not, you'll need to configure guards, database and inertia manually)",
         }
       )
     }
@@ -313,9 +313,10 @@ export class CreateNewApp extends BaseCommand {
    */
   async #removeLockFile() {
     await Promise.allSettled([
+      unlink(join(this.destination, 'bun.lockb')),
       unlink(join(this.destination, 'package-lock.json')),
-      unlink(join(this.destination, 'yarn.lock')),
       unlink(join(this.destination, 'pnpm-lock.yaml')),
+      unlink(join(this.destination, 'yarn.lock')),
     ])
   }
 
@@ -481,8 +482,7 @@ export class CreateNewApp extends BaseCommand {
     /**
      * Configure inertia when using our inertia starter kit
      */
-    const configureInertia =
-      this.kit === INERTIA_STARTER_KIT && this.db !== undefined && this.install !== false
+    const configureInertia = this.kit === INERTIA_STARTER_KIT && this.install !== false
 
     tasks
       .add('Download starter kit', async (task) => {

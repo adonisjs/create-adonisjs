@@ -31,7 +31,6 @@ test.group('Create new app', (group) => {
   test('clone template to destination', async ({ assert, fs }) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
-      '--no-install',
       '--db=sqlite',
       '--auth-guard=session',
       '--kit="github:samuelmarina/is-even"',
@@ -47,7 +46,6 @@ test.group('Create new app', (group) => {
   test('use github as default provider', async ({ assert, fs }) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
-      '--no-install',
       '--kit="samuelmarina/is-even"',
     ])
 
@@ -60,7 +58,6 @@ test.group('Create new app', (group) => {
 
   test('prompt for destination when not provided', async ({ assert }) => {
     const command = await kernel.create(CreateNewApp, [
-      '--no-install',
       '--db=sqlite',
       '--auth-guard=session',
       '--kit="github:samuelmarina/is-even"',
@@ -78,7 +75,6 @@ test.group('Create new app', (group) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
       '--pkg="npm"',
-      '--install',
       // not provide `--db` and `--auth-guard` to test that it will not prompt for slim kit
     ])
 
@@ -102,7 +98,6 @@ test.group('Create new app', (group) => {
       '--pkg="npm"',
       '-K=web',
       '--db=sqlite',
-      '--install',
     ])
 
     command.verbose = VERBOSE
@@ -127,7 +122,6 @@ test.group('Create new app', (group) => {
       '--pkg="npm"',
       '-K=api',
       '--auth-guard=session',
-      '--install',
     ])
 
     command.verbose = VERBOSE
@@ -143,29 +137,6 @@ test.group('Create new app', (group) => {
     await assert.fileExists('foo/config/database.ts')
   })
 
-  test('prompt for install dependencies when --install flag is not used', async ({
-    assert,
-    fs,
-  }) => {
-    const command = await kernel.create(CreateNewApp, [
-      join(fs.basePath, 'foo'),
-      '--pkg="npm"',
-      '--db=sqlite',
-      '--auth-guard=session',
-      '-K=slim',
-    ])
-
-    command.verbose = VERBOSE
-    command.prompt.trap('Do you want to install dependencies using "npm"').replyWith(true)
-
-    await command.exec()
-
-    const result = await execa('node', ['ace', '--help'], { cwd: join(fs.basePath, 'foo') })
-
-    assert.deepEqual(result.exitCode, 0)
-    assert.deepInclude(result.stdout, 'View list of available commands')
-  })
-
   test('do not configure lucid when user skip database driver selection', async ({
     assert,
     fs,
@@ -173,7 +144,6 @@ test.group('Create new app', (group) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
       '--pkg="npm"',
-      '--install',
       '-K=web',
       '--auth-guard=session',
     ])
@@ -196,7 +166,6 @@ test.group('Create new app', (group) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
       '--pkg="npm"',
-      '--install',
       '-K=web',
       '--db=sqlite',
     ])
@@ -220,7 +189,6 @@ test.group('Create new app', (group) => {
 
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
-      '--no-install',
       '--kit="github:samuelmarina/is-even"',
     ])
 
@@ -245,7 +213,6 @@ test.group('Create new app', (group) => {
 
       const command = await kernel.create(CreateNewApp, [
         join(fs.basePath, 'foo'),
-        '--install',
         '--db=sqlite',
         '--auth-guard=session',
         '--kit="github:samuelmarina/is-even"',
@@ -259,25 +226,9 @@ test.group('Create new app', (group) => {
       process.env.npm_config_user_agent = undefined
     })
 
-  test('do not install dependencies when --no-install flag is provided', async ({ assert, fs }) => {
-    const command = await kernel.create(CreateNewApp, [
-      join(fs.basePath, 'foo'),
-      '--db=sqlite',
-      '--auth-guard=session',
-      '--no-install',
-      '--kit="github:samuelmarina/is-even"',
-    ])
-
-    command.verbose = VERBOSE
-    await command.exec()
-
-    await assert.fileNotExists(`foo/package-lock.json`)
-  })
-
   test('initialize git repo when --git-init flag is provided', async ({ assert, fs }) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
-      '--no-install',
       '--git-init',
       '--kit="github:samuelmarina/is-even"',
     ])
@@ -294,7 +245,6 @@ test.group('Create new app', (group) => {
       '--pkg="yarn"',
       '--db=sqlite',
       '--auth-guard=session',
-      '--install',
       '--kit="github:samuelmarina/is-even"',
     ])
 
@@ -308,7 +258,6 @@ test.group('Create new app', (group) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
       '--pkg="npm"',
-      '--install',
       '--kit="github:adonisjs/slim-starter-kit"',
     ])
 
@@ -325,7 +274,6 @@ test.group('Create new app', (group) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
       '--pkg="npm"',
-      '--no-install',
       '--kit="github:adonisjs/slim-starter-kit"',
     ])
 
@@ -338,7 +286,6 @@ test.group('Create new app', (group) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
       '--pkg="npm"',
-      '--no-install',
       '--kit="github:adonisjs/slim-starter-kit"',
     ])
 
@@ -351,28 +298,12 @@ test.group('Create new app', (group) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo/bar'),
       '--pkg="npm"',
-      '--no-install',
       '--kit="github:adonisjs/slim-starter-kit"',
     ])
 
     command.verbose = VERBOSE
     await command.exec()
     await assert.fileContains('foo/bar/package.json', `"name": "bar"`)
-  })
-
-  test('remove existing lockfile if starter kit contains one', async ({ assert, fs }) => {
-    const command = await kernel.create(CreateNewApp, [
-      join(fs.basePath, 'foo'),
-      '--pkg="npm"',
-      '--no-install',
-      '--kit="github:adonisjs/slim-starter-kit"',
-    ])
-
-    command.verbose = VERBOSE
-    await command.exec()
-    await assert.fileNotExists('foo/yarn.lock')
-    await assert.fileNotExists('foo/package-lock.json')
-    await assert.fileNotExists('foo/pnpm-lock.yaml')
   })
 })
 
@@ -385,7 +316,6 @@ test.group('Configure | Web starter kit', (group) => {
       '--pkg="npm"',
       '--db=sqlite',
       '--auth-guard=session',
-      '--install',
       '-K=web',
     ])
 
@@ -417,7 +347,6 @@ test.group('Configure | Web starter kit', (group) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
       '--pkg="npm"',
-      '--install',
       '-K=web',
       '--auth-guard=session',
       '--db=postgres',
@@ -442,7 +371,6 @@ test.group('Configure | API starter kit', (group) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
       '--pkg="npm"',
-      '--install',
       '-K=api',
       '--db=sqlite',
       '--auth-guard=session',
@@ -485,7 +413,6 @@ test.group('Configure | API starter kit', (group) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
       '--pkg="npm"',
-      '--install',
       '-K=api',
       '--db=sqlite',
       '--auth-guard=access_tokens',
@@ -516,7 +443,6 @@ test.group('Configure | Inertia Starter Kit', (group) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
       '--pkg="npm"',
-      '--install',
       '-K=inertia',
       '--db=sqlite',
       '--auth-guard=session',

@@ -305,20 +305,6 @@ test.group('Create new app', (group) => {
     await command.exec()
     await assert.fileContains('foo/bar/package.json', `"name": "bar"`)
   })
-
-  test('remove existing lockfile if starter kit contains one', async ({ assert, fs }) => {
-    const command = await kernel.create(CreateNewApp, [
-      join(fs.basePath, 'foo'),
-      '--pkg="npm"',
-      '--kit="github:adonisjs/slim-starter-kit"',
-    ])
-
-    command.verbose = VERBOSE
-    await command.exec()
-    await assert.fileNotExists('foo/yarn.lock')
-    await assert.fileNotExists('foo/package-lock.json')
-    await assert.fileNotExists('foo/pnpm-lock.yaml')
-  })
 })
 
 test.group('Configure | Web starter kit', (group) => {

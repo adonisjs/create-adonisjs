@@ -112,12 +112,10 @@ npm init adonisjs -- --kit="web" --db="mysql"
 
 ### Other options
 
-| Option         | Description                                                                             |
-| -------------- | --------------------------------------------------------------------------------------- |
-| `--install`    | Install dependencies. A prompt will be shown when the flag is not mentioned explicitly. |
-| `--git-init`   | Initialize git repository.                                                              |
-| `--no-install` | Explicitly opt out from installing dependencies and skip the prompt                     |
-| `--verbose`    | Enable verbose mode to display all logs                                                 |
+| Option       | Description                             |
+| ------------ | --------------------------------------- |
+| `--git-init` | Initialize git repository.              |
+| `--verbose`  | Enable verbose mode to display all logs |
 
 ## Debugging errors
 

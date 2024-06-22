@@ -375,6 +375,7 @@ export class CreateNewApp extends BaseCommand {
       '--adapter',
       this.adapter!,
       this.ssr ? '--ssr' : '--no-ssr',
+      '--install',
     ]
 
     if (this.verbose) {

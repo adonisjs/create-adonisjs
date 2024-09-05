@@ -30,6 +30,6 @@ export const adapters = [
   {
     name: 'skip',
     message: 'Skip',
-    hint: 'I want to configure Interia manually',
+    hint: 'I want to configure Inertia manually',
   },
 ]

@@ -29,8 +29,6 @@ test.group('Create new app', (group) => {
   test('clone template to destination', async ({ assert, fs }) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
-      '--db=sqlite',
-      '--auth-guard=session',
       '--kit="github:samuelmarina/is-even"',
     ])
 
@@ -55,14 +53,10 @@ test.group('Create new app', (group) => {
   })
 
   test('prompt for destination when not provided', async ({ assert }) => {
-    const command = await kernel.create(CreateNewApp, [
-      '--db=sqlite',
-      '--auth-guard=session',
-      '--kit="github:samuelmarina/is-even"',
-    ])
+    const command = await kernel.create(CreateNewApp, ['--kit="github:samuelmarina/is-even"'])
 
     command.verbose = VERBOSE
-    command.prompt.trap('Where should we create your new project').replyWith('tmp/foo')
+    command.prompt.trap('Where should we create your new project?').replyWith('tmp/foo')
     await command.exec()
 
     await assert.dirIsNotEmpty('foo')
@@ -70,14 +64,10 @@ test.group('Create new app', (group) => {
   })
 
   test('prompt for kit selection when not pre-defined', async ({ assert, fs }) => {
-    const command = await kernel.create(CreateNewApp, [
-      join(fs.basePath, 'foo'),
-      '--pkg="npm"',
-      // not provide `--db` and `--auth-guard` to test that it will not prompt for slim kit
-    ])
+    const command = await kernel.create(CreateNewApp, [join(fs.basePath, 'foo'), '--pkg="npm"'])
 
     command.verbose = VERBOSE
-    command.prompt.trap('Which starter kit would you like to use').chooseOption(0)
+    command.prompt.trap('Select the kind of app you want to create?').chooseOption(0)
 
     await command.exec()
 
@@ -109,15 +99,12 @@ test.group('Create new app', (group) => {
     .with([
       { agent: 'npm/7.0.0 node/v15.0.0 darwin x64', lockFile: 'package-lock.json' },
       { agent: 'pnpm/5.0.0 node/v15.0.0 darwin x64', lockFile: 'pnpm-lock.yaml' },
-      { agent: 'yarn/1.22.5 npm/? node/v15.0.0 darwin x64', lockFile: 'yarn.lock' },
     ])
     .run(async ({ assert, fs }, { agent, lockFile }) => {
       process.env.npm_config_user_agent = agent
 
       const command = await kernel.create(CreateNewApp, [
         join(fs.basePath, 'foo'),
-        '--db=sqlite',
-        '--auth-guard=session',
         '--kit="github:samuelmarina/is-even"',
       ])
 
@@ -145,23 +132,21 @@ test.group('Create new app', (group) => {
   test('force package manager', async ({ assert, fs }) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
-      '--pkg="yarn"',
-      '--db=sqlite',
-      '--auth-guard=session',
-      '--kit="github:samuelmarina/is-even"',
+      '--pkg="pnpm"',
+      '--kit="github:adonisjs/slim-starter-kit"',
     ])
 
     command.verbose = VERBOSE
     await command.exec()
 
-    await assert.fileExists('foo/yarn.lock')
+    await assert.fileExists('foo/pnpm-lock.yaml')
   })
 
-  test('configure slim starter kit', async ({ assert, fs }) => {
+  test('configure hypermedia starter kit', async ({ assert, fs }) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
       '--pkg="npm"',
-      '--kit="github:adonisjs/slim-starter-kit"',
+      '--kit="github:adonisjs/web-starter-kit#7.x"',
     ])
 
     command.verbose = VERBOSE

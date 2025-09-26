@@ -10,22 +10,21 @@ Scaffold a new AdonisJS application using starter kits
 
 You can use between one of the following official starter kits, or bring your own using the `--kit` flag.
 
-- `api` : AdonisJS application tailored for building HTTP APIs.
-- `web` : AdonisJS application tailored for building server-side rendered applications.
-- `slim` : Smallest possible AdonisJS application. Still way more powerful and batteries included than a express application.
-- `inertia`: AdonisJS application tailored for building applications using InertiaJS and your favorite frontend framework (Vue, React, Svelte, Solid).
+- `hypermedia` : A fullstack application using server-side templates, alongside Alpine.js and optionally Unpoly.
+- `react`: A fullstack React application with E2E type-safety. Inertia is used as a bridge between the frontend and the backend.
+- `vue`: A fullstack Vue application with E2E type-safety. Inertia is used as a bridge between the frontend and the backend.
 
 ## Usage
 
 ```sh
 # Using npm
-npm init adonisjs
+npm init adonisjs@next
 
 # Using yarn
-yarn create adonisjs
+yarn create adonisjs@next
 
 # Using pnpm
-pnpm create adonisjs
+pnpm create adonisjs@next
 ```
 
 ## Options
@@ -35,7 +34,7 @@ pnpm create adonisjs
 You can pass the destination directory as the first argument to the command. For example:
 
 ```sh
-npm init adonisjs my-app
+npm init adonisjs@next my-app
 ```
 
 This argument is optional and the command will prompt you to enter the directory name if not provided.
@@ -48,26 +47,26 @@ If you want to use your own starter kit hosted on Github, Gitlab, or Bitbucket, 
 
 ```sh
 # Download from GitHub
-npm init adonisjs -- --kit="github:github_user/repo"
+npm init adonisjs@next -- --kit="github:github_user/repo"
 
 # Github is the default provider, so if not specified, it will be assumed as github
-npm init adonisjs -- --kit="github_user/repo"
+npm init adonisjs@next -- --kit="github_user/repo"
 
 # Download from GitLab
-npm init adonisjs -- --kit="gitlab:user/repo"
+npm init adonisjs@next -- --kit="gitlab:user/repo"
 
 # Download from BitBucket
-npm init adonisjs -- --kit="bitbucket:user/repo"
+npm init adonisjs@next -- --kit="bitbucket:user/repo"
 ```
 
 You can also pass specify the branch or tag name as follows:
 
 ```sh
 # Branch name
-npm init adonisjs -- --kit="github:github_user/repo#branch-name"
+npm init adonisjs@next -- --kit="github:github_user/repo#branch-name"
 
 # Tag name
-npm init adonisjs -- --kit="github:github_user/repo#v1.0.0"
+npm init adonisjs@next -- --kit="github:github_user/repo#v1.0.0"
 ```
 
 ### `--token` (Default: undefined)
@@ -75,7 +74,7 @@ npm init adonisjs -- --kit="github:github_user/repo#v1.0.0"
 If you are using a custom starter kit hosted on a private repository, then you can pass the authentication token as follows:
 
 ```sh
-npm init adonisjs -- --kit="github:github_user/repo" --token="github_token"
+npm init adonisjs@next -- --kit="github:github_user/repo" --token="github_token"
 ```
 
 ### `--pkg` (Default: Auto detects)
@@ -83,31 +82,7 @@ npm init adonisjs -- --kit="github:github_user/repo" --token="github_token"
 We are trying to detect the package manager used by your project. However, if you want to force a specific package manager, then you can pass it as follows:
 
 ```sh
-npm init adonisjs -- --pkg="yarn"
-```
-
-### `--auth-guard` (Default: Triggers prompt for selection)
-
-Specify a custom auth guard to use when using the `api` stater kit. One of the following options are allowed
-
-- `session`
-- `access_tokens`
-
-```sh
-npm init adonisjs -- --kit="api" --auth-guard="access_tokens"
-```
-
-### `--db` (Default: Triggers prompt for selection)
-
-Specify the database dialect to configure with Lucid. One of the following options are allowd.
-
-- `sqlite`
-- `mysql`
-- `mssql`
-- `postgres`
-
-```sh
-npm init adonisjs -- --kit="web" --db="mysql"
+npm init adonisjs@next -- --pkg="yarn"
 ```
 
 ### Other options
@@ -122,7 +97,7 @@ npm init adonisjs -- --kit="web" --db="mysql"
 If creating a new project fails, then you must re-run the same command with the `--verbose` flag to view all the logs.
 
 ```sh
-npm init adonisjs -- --verbose
+npm init adonisjs@next -- --verbose
 ```
 
 ## Contributing

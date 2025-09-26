@@ -1,7 +1,7 @@
 {
   "name": "create-adonisjs",
   "description": "Scaffold new AdonisJS applications using starter kits",
-  "version": "2.4.0",
+  "version": "3.0.0-next.0",
   "engines": {
     "node": ">=24.0.0"
   },

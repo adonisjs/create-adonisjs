@@ -1,6 +1,6 @@
 import { assert } from '@japa/assert'
-import { processCLIArgs, configure, run } from '@japa/runner'
 import { fileSystem } from '@japa/file-system'
+import { processCLIArgs, configure, run } from '@japa/runner'
 
 /*
 |--------------------------------------------------------------------------

@@ -12,27 +12,21 @@
  */
 export const templates = [
   {
-    name: 'Slim Starter Kit',
-    alias: 'slim',
-    hint: 'A lean AdonisJS application with just the framework core',
-    source: 'github:adonisjs/slim-starter-kit',
+    name: 'Hypermedia app',
+    alias: 'hypermedia',
+    hint: 'A fullstack application using server-side templates',
+    source: 'github:adonisjs/web-starter-kit#7.x',
   },
   {
-    name: 'Web Starter Kit',
-    alias: 'web',
-    hint: 'Everything you need to build a server render app',
-    source: 'github:adonisjs/web-starter-kit',
-  },
-  {
-    name: 'API Starter Kit',
-    alias: 'api',
-    hint: 'AdonisJS app tailored for creating JSON APIs',
-    source: 'github:adonisjs/api-starter-kit',
-  },
-  {
-    name: 'Inertia Starter Kit',
+    name: 'React app (using Inertia)',
     alias: 'inertia',
-    hint: 'Inertia app with a frontend framework of your choice',
-    source: 'github:adonisjs/inertia-starter-kit',
+    hint: 'A fullstack React application with E2E type-safety',
+    source: 'github:adonisjs/react-starter-kit#7.x',
+  },
+  {
+    name: 'Vue app (using Inertia)',
+    alias: 'inertia',
+    hint: 'A fullstack Vue application with E2E type-safety',
+    source: 'github:adonisjs/vue-starter-kit#7.x',
   },
 ]

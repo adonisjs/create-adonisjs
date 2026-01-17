@@ -146,10 +146,28 @@ test.group('Create new app', (group) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
       '--pkg="npm"',
-      '--kit="github:adonisjs/web-starter-kit#7.x"',
+      '--kit="github:adonisjs/starter-kits/hypermedia"',
     ])
 
     command.verbose = VERBOSE
+    await command.exec()
+
+    const result = await execa('node', ['ace', '--help'], { cwd: join(fs.basePath, 'foo') })
+
+    assert.deepEqual(result.exitCode, 0)
+    assert.deepInclude(result.stdout, 'View list of available commands')
+  })
+
+  test('prompt for frontend framework when using inertia alias', async ({ assert, fs }) => {
+    const command = await kernel.create(CreateNewApp, [
+      join(fs.basePath, 'foo'),
+      '--pkg="npm"',
+      '--kit="inertia"',
+    ])
+
+    command.verbose = VERBOSE
+    command.prompt.trap('Which frontend framework do you want to use?').chooseOption(0)
+
     await command.exec()
 
     const result = await execa('node', ['ace', '--help'], { cwd: join(fs.basePath, 'foo') })

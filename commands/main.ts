@@ -253,20 +253,9 @@ export class CreateNewApp extends BaseCommand {
       /**
        * Allowing users to mention aliases via the CLI flag.
        */
-      const matchingTemplatesFromAlias = templates.filter((t) => t.alias === this.kit)
-
-      if (matchingTemplatesFromAlias.length > 1) {
-        /**
-         * Multiple templates match the alias (e.g., "inertia")
-         * Prompt the user to choose between them
-         */
-        const template = await this.prompt.choice(
-          'Which frontend framework do you want to use?',
-          matchingTemplatesFromAlias
-        )
-        this.kit = matchingTemplatesFromAlias.find((t) => t.name === template)!.source
-      } else if (matchingTemplatesFromAlias.length === 1) {
-        this.kit = matchingTemplatesFromAlias[0].source
+      const matchingTemplate = templates.find((t) => t.alias === this.kit)
+      if (matchingTemplate) {
+        this.kit = matchingTemplate.source
       }
     }
   }

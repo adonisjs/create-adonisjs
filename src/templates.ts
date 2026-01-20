@@ -19,14 +19,20 @@ export const templates = [
   },
   {
     name: 'React app (using Inertia)',
-    alias: 'inertia',
+    alias: 'react',
     hint: 'A fullstack React application with E2E type-safety',
     source: 'github:adonisjs/starter-kits/inertia-react',
   },
   {
     name: 'Vue app (using Inertia)',
-    alias: 'inertia',
+    alias: 'vue',
     hint: 'A fullstack Vue application with E2E type-safety',
     source: 'github:adonisjs/starter-kits/inertia-vue',
+  },
+  {
+    name: 'API (monorepo)',
+    alias: 'api',
+    hint: 'Type-safe REST API with dual authentication',
+    source: 'github:adonisjs/starter-kits/api',
   },
 ]

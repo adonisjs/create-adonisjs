@@ -8,7 +8,16 @@
  */
 
 /**
- * List of first party templates
+ * List of first party templates available for creating new AdonisJS projects.
+ * Each template represents a different project starter kit with its own configuration
+ * and dependencies.
+ *
+ * @example
+ * ```ts
+ * const hyperMediaTemplate = templates.find(t => t.alias === 'hypermedia')
+ * console.log(hyperMediaTemplate.source)
+ * // Output: 'github:adonisjs/starter-kits/hypermedia'
+ * ```
  */
 export const templates = [
   {

@@ -91,12 +91,34 @@ export class CreateNewApp extends BaseCommand {
   declare verbose?: boolean
 
   /**
-   * Both properties are available after the starter kit
-   * has been cloned
+   * Whether the starter kit is a monorepo workspace
+   * This property is set after the starter kit has been cloned and inspected
    */
   declare isMonorepo: boolean
+
+  /**
+   * The directory containing the backend source code
+   * For monorepos, this points to the backend workspace directory.
+   * For single packages, this is the same as the destination directory.
+   * This property is set after the starter kit has been cloned and inspected
+   */
   declare backendSourceDir: string
 
+  /**
+   * Inspects the downloaded starter kit by reading the create-adonisjs.json config file.
+   * This method determines if the starter kit is a monorepo and identifies the backend
+   * source directory location. The config file is deleted after being read.
+   *
+   * Sets the following properties:
+   * - `isMonorepo`: Whether the starter kit uses workspaces
+   * - `backendSourceDir`: The absolute path to the backend source code
+   *
+   * @example
+   * await this.#inspectStarterKit()
+   * if (this.isMonorepo) {
+   *   console.log('Backend is in:', this.backendSourceDir)
+   * }
+   */
   async #inspectStarterKit() {
     const configFile = join(this.destination, 'create-adonisjs.json')
 
@@ -116,7 +138,18 @@ export class CreateNewApp extends BaseCommand {
   }
 
   /**
-   * Runs bash command using execa with shared defaults
+   * Executes a bash command using execa with shared default options.
+   * Commands are run from the specified source directory with consistent
+   * settings for output display based on the verbose flag.
+   *
+   * @param sourceDir - The working directory to execute the command from
+   * @param file - The command or executable to run
+   * @param cliArgs - Array of command-line arguments to pass to the command
+   * @param options - Optional execa options to override defaults
+   *
+   * @example
+   * await this.#runBashCommand(this.destination, 'git', ['init'])
+   * await this.#runBashCommand(this.backendSourceDir, 'node', ['ace', 'generate:key'])
    */
   async #runBashCommand(sourceDir: string, file: string, cliArgs: string[], options?: Options) {
     await execa(file, cliArgs, {
@@ -130,7 +163,12 @@ export class CreateNewApp extends BaseCommand {
   }
 
   /**
-   * Prints AdonisJS as ASCII art
+   * Prints the AdonisJS logo as ASCII art using a gradient effect.
+   * The banner is displayed at the start of the project creation process
+   * to provide visual branding.
+   *
+   * @example
+   * this.#printBannerArt()
    */
   #printBannerArt() {
     const title = Buffer.from(
@@ -144,7 +182,12 @@ export class CreateNewApp extends BaseCommand {
   }
 
   /**
-   * Print the success message
+   * Displays a success message with next steps after the project has been created.
+   * Shows instructions for navigating to the project, starting the dev server,
+   * and provides a link to the Discord community.
+   *
+   * @example
+   * this.#printSuccessMessage()
    */
   #printSuccessMessage() {
     this.logger.log('')
@@ -162,7 +205,15 @@ export class CreateNewApp extends BaseCommand {
   }
 
   /**
-   * Prompt for the destination directory
+   * Prompts the user to specify a destination directory if one was not provided
+   * as a command argument. Converts relative paths to absolute paths using the
+   * current working directory.
+   *
+   * Sets the `destination` property to the absolute path where the project will be created.
+   *
+   * @example
+   * await this.#promptForDestination()
+   * console.log('Creating project at:', this.destination)
    */
   async #promptForDestination() {
     if (!this.destination) {
@@ -177,7 +228,16 @@ export class CreateNewApp extends BaseCommand {
   }
 
   /**
-   * Prompt to configure a starter kit
+   * Prompts the user to select a starter kit if one was not provided via the --kit flag.
+   * Handles both interactive selection and CLI flag aliases. When multiple templates
+   * share the same alias (e.g., "inertia" for different frontend frameworks), prompts
+   * the user to choose between them.
+   *
+   * Sets the `kit` property to the Git repository URL of the selected template.
+   *
+   * @example
+   * await this.#promptForStarterKit()
+   * console.log('Using starter kit:', this.kit)
    */
   async #promptForStarterKit() {
     if (!this.kit) {
@@ -212,8 +272,14 @@ export class CreateNewApp extends BaseCommand {
   }
 
   /**
-   * Replace the package.json name with the destination directory name.
-   * Errors are ignored.
+   * Updates the package.json name property to match the destination directory name.
+   * This ensures the package name reflects the actual project directory rather than
+   * the starter kit's default name.
+   *
+   * @param sourceDir - The directory containing the package.json file to update
+   *
+   * @example
+   * await this.#replacePackageJsonName(this.backendSourceDir)
    */
   async #replacePackageJsonName(sourceDir: string) {
     const pkgJsonPath = join(sourceDir, 'package.json')
@@ -225,7 +291,12 @@ export class CreateNewApp extends BaseCommand {
   }
 
   /**
-   * Optionally removes readme file. Errors are ignored
+   * Removes the README.md file from the destination directory.
+   * This allows users to start with a clean slate for their project documentation.
+   * Silently ignores errors if the file doesn't exist.
+   *
+   * @example
+   * await this.#removeReadmeFile()
    */
   async #removeReadmeFile() {
     try {
@@ -234,7 +305,13 @@ export class CreateNewApp extends BaseCommand {
   }
 
   /**
-   * Optionally remove existing lock file. Errors are ignored
+   * Removes existing package manager lock files (package-lock.json, yarn.lock, pnpm-lock.yaml)
+   * from both the destination directory and backend source directory (if different).
+   * This ensures a fresh lock file will be generated based on the user's chosen package manager.
+   * Silently ignores errors if files don't exist.
+   *
+   * @example
+   * await this.#removeLockFile()
    */
   async #removeLockFile() {
     const filesToRemove = [
@@ -256,7 +333,12 @@ export class CreateNewApp extends BaseCommand {
   }
 
   /**
-   * If starter template has a `.env.example` file, then copy it to `.env`
+   * Copies the .env.example file to .env in the backend source directory if it exists.
+   * This provides the user with a properly configured environment file based on the
+   * starter kit's defaults.
+   *
+   * @example
+   * await this.#copyEnvExampleFile()
    */
   async #copyEnvExampleFile() {
     const envPath = join(this.backendSourceDir, '.env')
@@ -268,14 +350,22 @@ export class CreateNewApp extends BaseCommand {
   }
 
   /**
-   * Generate a fresh app key. Errors are ignored
+   * Generates a fresh application encryption key by running the `node ace generate:key` command.
+   * This creates a secure random key for encrypting cookies and other sensitive data.
+   *
+   * @example
+   * await this.#generateFreshAppKey()
    */
   async #generateFreshAppKey() {
     await this.#runBashCommand(this.backendSourceDir, 'node', ['ace', 'generate:key'])
   }
 
   /**
-   * Migrates the newly create SQLite database
+   * Creates the tmp directory and runs database migrations by executing `node ace migration:run`.
+   * This sets up the initial database schema for the new application.
+   *
+   * @example
+   * await this.#migrateDatabase()
    */
   async #migrateDatabase() {
     await mkdir(join(this.backendSourceDir, 'tmp'))
@@ -283,7 +373,19 @@ export class CreateNewApp extends BaseCommand {
   }
 
   /**
-   * Main method
+   * Main entry point for the create-adonisjs command.
+   * Orchestrates the entire project creation workflow including:
+   * - Displaying the AdonisJS banner
+   * - Prompting for destination and starter kit selection
+   * - Downloading and configuring the starter kit
+   * - Installing dependencies
+   * - Preparing the application (env files, app key, etc.)
+   * - Running database migrations
+   * - Displaying success message with next steps
+   *
+   * @example
+   * const command = new CreateNewApp()
+   * await command.run()
    */
   async run() {
     this.packageManager = this.packageManager || detectPackageManager()?.name || 'npm'

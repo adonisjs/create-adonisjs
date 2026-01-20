@@ -15,7 +15,7 @@ import { type Options, execa } from 'execa'
 import detectPackageManager from 'which-pm-runs'
 import { BaseCommand, args, flags } from '@adonisjs/ace'
 import { basename, isAbsolute, join, relative } from 'node:path'
-import { copyFile, readFile, unlink, writeFile } from 'node:fs/promises'
+import { copyFile, mkdir, readFile, unlink, writeFile } from 'node:fs/promises'
 
 import { templates } from '../src/templates.js'
 
@@ -64,6 +64,14 @@ export class CreateNewApp extends BaseCommand {
   declare gitInit?: boolean
 
   /**
+   * Skip running database migrations. Defaults to false
+   */
+  @flags.boolean({
+    description: 'Skip running database migrations',
+  })
+  declare skipMigrations?: boolean
+
+  /**
    * Package manager to use. Detect package manager when flag is not
    * mentioned.
    */
@@ -83,11 +91,36 @@ export class CreateNewApp extends BaseCommand {
   declare verbose?: boolean
 
   /**
+   * Both properties are available after the starter kit
+   * has been cloned
+   */
+  declare isMonorepo: boolean
+  declare backendSourceDir: string
+
+  async #inspectStarterKit() {
+    const configFile = join(this.destination, 'create-adonisjs.json')
+
+    try {
+      const config = await readFile(configFile, 'utf-8')
+      const parsedConfig = JSON.parse(config)
+
+      await unlink(configFile)
+
+      this.isMonorepo = parsedConfig.workspaces ?? false
+      this.backendSourceDir = parsedConfig.backendSource
+        ? join(this.destination, parsedConfig.backendSource)
+        : this.destination
+    } catch {
+      this.backendSourceDir = this.destination
+    }
+  }
+
+  /**
    * Runs bash command using execa with shared defaults
    */
-  async #runBashCommand(file: string, cliArgs: string[], options?: Options) {
+  async #runBashCommand(sourceDir: string, file: string, cliArgs: string[], options?: Options) {
     await execa(file, cliArgs, {
-      cwd: this.destination,
+      cwd: sourceDir,
       preferLocal: true,
       windowsHide: false,
       buffer: false,
@@ -175,7 +208,6 @@ export class CreateNewApp extends BaseCommand {
       } else if (matchingTemplatesFromAlias.length === 1) {
         this.kit = matchingTemplatesFromAlias[0].source
       }
-      // If no alias matches, keep this.kit as-is (custom URL)
     }
   }
 
@@ -183,11 +215,11 @@ export class CreateNewApp extends BaseCommand {
    * Replace the package.json name with the destination directory name.
    * Errors are ignored.
    */
-  async #replacePackageJsonName() {
-    const pkgJsonPath = join(this.destination, 'package.json')
+  async #replacePackageJsonName(sourceDir: string) {
+    const pkgJsonPath = join(sourceDir, 'package.json')
 
     const pkgJson = await readFile(pkgJsonPath, 'utf-8').then(JSON.parse)
-    pkgJson.name = basename(this.destination)
+    pkgJson.name = basename(sourceDir)
 
     await writeFile(pkgJsonPath, JSON.stringify(pkgJson, null, 2))
   }
@@ -196,26 +228,39 @@ export class CreateNewApp extends BaseCommand {
    * Optionally removes readme file. Errors are ignored
    */
   async #removeReadmeFile() {
-    await unlink(join(this.destination, 'README.md'))
+    try {
+      await unlink(join(this.destination, 'README.md'))
+    } catch {}
   }
 
   /**
    * Optionally remove existing lock file. Errors are ignored
    */
   async #removeLockFile() {
-    await Promise.allSettled([
+    const filesToRemove = [
       unlink(join(this.destination, 'package-lock.json')),
       unlink(join(this.destination, 'yarn.lock')),
       unlink(join(this.destination, 'pnpm-lock.yaml')),
-    ])
+    ]
+
+    if (this.backendSourceDir !== this.destination) {
+      filesToRemove.push(
+        ...[
+          unlink(join(this.backendSourceDir, 'package-lock.json')),
+          unlink(join(this.backendSourceDir, 'yarn.lock')),
+          unlink(join(this.backendSourceDir, 'pnpm-lock.yaml')),
+        ]
+      )
+    }
+    await Promise.allSettled(filesToRemove)
   }
 
   /**
    * If starter template has a `.env.example` file, then copy it to `.env`
    */
   async #copyEnvExampleFile() {
-    const envPath = join(this.destination, '.env')
-    const envExamplePath = join(this.destination, '.env.example')
+    const envPath = join(this.backendSourceDir, '.env')
+    const envExamplePath = join(this.backendSourceDir, '.env.example')
 
     if (existsSync(envExamplePath)) {
       await copyFile(envExamplePath, envPath)
@@ -226,7 +271,15 @@ export class CreateNewApp extends BaseCommand {
    * Generate a fresh app key. Errors are ignored
    */
   async #generateFreshAppKey() {
-    await this.#runBashCommand('node', ['ace', 'generate:key'])
+    await this.#runBashCommand(this.backendSourceDir, 'node', ['ace', 'generate:key'])
+  }
+
+  /**
+   * Migrates the newly create SQLite database
+   */
+  async #migrateDatabase() {
+    await mkdir(join(this.backendSourceDir, 'tmp'))
+    await this.#runBashCommand(this.backendSourceDir, 'node', ['ace', 'migration:run'])
   }
 
   /**
@@ -260,11 +313,12 @@ export class CreateNewApp extends BaseCommand {
           auth: this.token,
           registry: false,
         })
+        await this.#inspectStarterKit()
         await this.#removeLockFile()
         return `Downloaded "${this.kit}"`
       })
       .addIf(this.gitInit === true, 'Initialize git repository', async () => {
-        await this.#runBashCommand('git', ['init'])
+        await this.#runBashCommand(this.destination, 'git', ['init'])
         return 'Initialized git repository'
       })
       .add('Install packages', async (task) => {
@@ -276,15 +330,21 @@ export class CreateNewApp extends BaseCommand {
         spinner.start()
 
         try {
-          await this.#runBashCommand(this.packageManager, ['install'])
+          await this.#runBashCommand(
+            this.isMonorepo ? this.destination : this.backendSourceDir,
+            this.packageManager,
+            ['install']
+          )
           return `Packages installed using "${this.packageManager}"`
         } finally {
           spinner.stop()
         }
       })
-      .add('Prepare application', async () => {
+      .add('Prepare application', async (task) => {
         try {
-          await this.#replacePackageJsonName()
+          await this.#replacePackageJsonName(
+            this.isMonorepo ? this.destination : this.backendSourceDir
+          )
           await this.#removeReadmeFile()
           await this.#copyEnvExampleFile()
           await this.#generateFreshAppKey()
@@ -292,8 +352,21 @@ export class CreateNewApp extends BaseCommand {
         } catch (error) {
           if (this.verbose) {
             this.logger.fatal(error)
+            return task.error('Unable to prepare application')
           }
-          return 'Unable to prepare application'
+          return task.error(error)
+        }
+      })
+      .addIf(!this.skipMigrations, 'Migrate database', async (task) => {
+        try {
+          await this.#migrateDatabase()
+          return 'Database migrated'
+        } catch (error) {
+          if (this.verbose) {
+            this.logger.fatal(error)
+            return task.error('Unable to migrate database')
+          }
+          return task.error(error)
         }
       })
 

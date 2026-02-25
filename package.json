@@ -21,7 +21,7 @@
   },
   "scripts": {
     "pretest": "npm run lint",
-    "test": "cross-env NODE_DEBUG=create-adonisjs c8 npm run quick:test",
+    "test": "cross-env NODE_DEBUG=create-adonisjs npm run quick:test",
     "lint": "eslint",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",

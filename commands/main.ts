@@ -326,7 +326,7 @@ export class CreateNewApp extends BaseCommand {
    * Configures the session package
    */
   async #configureSession() {
-    await installPackage(['@adonisjs/session@latest'], {
+    await installPackage(['@adonisjs/session@7.7.1'], {
       cwd: this.destination,
       packageManager: this.packageManager,
       silent: !this.verbose,

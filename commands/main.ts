@@ -138,6 +138,35 @@ export class CreateNewApp extends BaseCommand {
   }
 
   /**
+   * Adapts the downloaded starter kit for the detected package manager.
+   * Handles two cases:
+   * - For pnpm monorepos: generates a pnpm-workspace.yaml from the workspaces field
+   * - For any PM mismatch: removes the packageManager field to avoid corepack conflicts
+   */
+  async #adaptForPackageManager() {
+    const pkgJsonPath = join(this.destination, 'package.json')
+    const pkgJson = await readFile(pkgJsonPath, 'utf-8').then(JSON.parse)
+
+    let dirty = false
+
+    if (this.isMonorepo && this.packageManager === 'pnpm' && Array.isArray(pkgJson.workspaces)) {
+      const lines = ['packages:']
+      for (const pattern of pkgJson.workspaces) lines.push(`  - '${pattern}'`)
+      await writeFile(join(this.destination, 'pnpm-workspace.yaml'), lines.join('\n') + '\n')
+
+      delete pkgJson.workspaces
+      dirty = true
+    }
+
+    if (pkgJson.packageManager && !pkgJson.packageManager.startsWith(this.packageManager)) {
+      delete pkgJson.packageManager
+      dirty = true
+    }
+
+    if (dirty) await writeFile(pkgJsonPath, JSON.stringify(pkgJson, null, 2))
+  }
+
+  /**
    * Executes a bash command using execa with shared default options.
    * Commands are run from the specified source directory with consistent
    * settings for output display based on the verbose flag.
@@ -405,6 +434,7 @@ export class CreateNewApp extends BaseCommand {
           registry: false,
         })
         await this.#inspectStarterKit()
+        await this.#adaptForPackageManager()
         await this.#removeLockFile()
         return `Downloaded "${this.kit}"`
       })

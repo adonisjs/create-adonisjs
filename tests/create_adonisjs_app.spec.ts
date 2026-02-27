@@ -182,6 +182,28 @@ test.group('Create new app', (group) => {
     await assert.fileNotExists('foo/README.md')
   })
 
+  test('generate pnpm-workspace.yaml for monorepo starter kits with pnpm', async ({
+    assert,
+    fs,
+  }) => {
+    const command = await kernel.create(CreateNewApp, [
+      join(fs.basePath, 'foo'),
+      '--pkg="pnpm"',
+      '--skip-migrations',
+      '--kit="github:adonisjs/starter-kits/api"',
+    ])
+
+    command.verbose = VERBOSE
+    await command.exec()
+
+    await assert.fileExists('foo/pnpm-workspace.yaml')
+    await assert.fileContains('foo/pnpm-workspace.yaml', "- 'apps/*'")
+
+    const pkgJson = await fs.contents('foo/package.json')
+    assert.notInclude(pkgJson, 'packageManager')
+    assert.notInclude(pkgJson, '"workspaces"')
+  })
+
   test('rename package name inside package.json file', async ({ assert, fs }) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo/bar'),

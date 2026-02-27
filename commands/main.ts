@@ -139,23 +139,24 @@ export class CreateNewApp extends BaseCommand {
 
   /**
    * Adapts the downloaded starter kit for the detected package manager.
-   * Handles two cases:
-   * - For pnpm monorepos: generates a pnpm-workspace.yaml from the workspaces field
-   * - For any PM mismatch: removes the packageManager field to avoid corepack conflicts
+   * - For pnpm monorepos: removes the workspaces field from package.json
+   * - For non-pnpm: removes pnpm-workspace.yaml if present
+   * - Removes packageManager field when it doesn't match the detected PM
    */
   async #adaptForPackageManager() {
     const pkgJsonPath = join(this.destination, 'package.json')
     const pkgJson = await readFile(pkgJsonPath, 'utf-8').then(JSON.parse)
+    const pnpmWorkspacePath = join(this.destination, 'pnpm-workspace.yaml')
 
     let dirty = false
 
-    if (this.isMonorepo && this.packageManager === 'pnpm' && Array.isArray(pkgJson.workspaces)) {
-      const lines = ['packages:']
-      for (const pattern of pkgJson.workspaces) lines.push(`  - '${pattern}'`)
-      await writeFile(join(this.destination, 'pnpm-workspace.yaml'), lines.join('\n') + '\n')
-
-      delete pkgJson.workspaces
-      dirty = true
+    if (this.packageManager === 'pnpm') {
+      if (this.isMonorepo && pkgJson.workspaces) {
+        delete pkgJson.workspaces
+        dirty = true
+      }
+    } else if (existsSync(pnpmWorkspacePath)) {
+      await unlink(pnpmWorkspacePath)
     }
 
     if (pkgJson.packageManager && !pkgJson.packageManager.startsWith(this.packageManager)) {

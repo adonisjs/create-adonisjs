@@ -139,32 +139,43 @@ export class CreateNewApp extends BaseCommand {
 
   /**
    * Adapts the downloaded starter kit for the detected package manager.
+   * - For non-pnpm package managers: removes pnpm-workspace.yaml
+   * - For non-monorepo starter kits: no further changes are needed
    * - For pnpm monorepos: removes the workspaces field from package.json
-   * - For non-pnpm: removes pnpm-workspace.yaml if present
-   * - Removes packageManager field when it doesn't match the detected PM
+   *   since pnpm uses pnpm-workspace.yaml for workspace configuration
+   * - For monorepos: sets the packageManager field in package.json to the
+   *   detected package manager name and version
    */
   async #adaptForPackageManager() {
     const pkgJsonPath = join(this.destination, 'package.json')
     const pkgJson = await readFile(pkgJsonPath, 'utf-8').then(JSON.parse)
     const pnpmWorkspacePath = join(this.destination, 'pnpm-workspace.yaml')
 
-    let dirty = false
-
-    if (this.packageManager === 'pnpm') {
-      if (this.isMonorepo && pkgJson.workspaces) {
-        delete pkgJson.workspaces
-        dirty = true
-      }
-    } else if (existsSync(pnpmWorkspacePath)) {
-      await unlink(pnpmWorkspacePath)
+    if (this.packageManager !== 'pnpm') {
+      try {
+        await unlink(pnpmWorkspacePath)
+      } catch {}
     }
 
-    if (pkgJson.packageManager && !pkgJson.packageManager.startsWith(this.packageManager)) {
-      delete pkgJson.packageManager
+    if (!this.isMonorepo) {
+      return
+    }
+
+    let dirty = false
+    if (this.packageManager === 'pnpm') {
+      delete pkgJson.workspaces
       dirty = true
     }
 
-    if (dirty) await writeFile(pkgJsonPath, JSON.stringify(pkgJson, null, 2))
+    const detectedPackageManager = detectPackageManager()
+    if (detectedPackageManager) {
+      pkgJson.packageManager = `${detectedPackageManager.name}@${detectedPackageManager.version}`
+      dirty = true
+    }
+
+    if (dirty) {
+      await writeFile(pkgJsonPath, JSON.stringify(pkgJson, null, 2))
+    }
   }
 
   /**

@@ -97,8 +97,8 @@ test.group('Create new app', (group) => {
 
   test('install dependencies using detected package manager - {agent}')
     .with([
-      { agent: 'npm/7.0.0 node/v15.0.0 darwin x64', lockFile: 'package-lock.json' },
-      { agent: 'pnpm/5.0.0 node/v15.0.0 darwin x64', lockFile: 'pnpm-lock.yaml' },
+      { agent: 'npm/11.0.0 node/v15.0.0 darwin x64', lockFile: 'package-lock.json' },
+      { agent: 'pnpm/10.0.0 node/v15.0.0 darwin x64', lockFile: 'pnpm-lock.yaml' },
     ])
     .run(async ({ assert, fs }, { agent, lockFile }) => {
       process.env.npm_config_user_agent = agent
@@ -185,10 +185,14 @@ test.group('Create new app', (group) => {
   test('keep pnpm-workspace.yaml and remove workspaces from package.json when using pnpm', async ({
     assert,
     fs,
+    cleanup,
   }) => {
+    process.env.npm_config_user_agent = 'pnpm/10.0.0 node/v15.0.0 darwin x64'
+    cleanup(() => {
+      delete process.env.npm_config_user_agent
+    })
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
-      '--pkg="pnpm"',
       '--skip-migrations',
       '--kit="github:adonisjs/starter-kits/api"',
     ])
@@ -199,9 +203,9 @@ test.group('Create new app', (group) => {
     await assert.fileExists('foo/pnpm-workspace.yaml')
     await assert.fileContains('foo/pnpm-workspace.yaml', "- 'apps/*'")
 
-    const pkgJson = await fs.contents('foo/package.json')
-    assert.notInclude(pkgJson, 'packageManager')
-    assert.notInclude(pkgJson, '"workspaces"')
+    const pkgJson = JSON.parse(await fs.contents('foo/package.json'))
+    assert.include(pkgJson.packageManager, 'pnpm')
+    assert.notProperty(pkgJson, 'workspaces')
   })
 
   test('remove pnpm-workspace.yaml when not using pnpm', async ({ assert, fs }) => {

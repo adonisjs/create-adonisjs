@@ -176,10 +176,16 @@ export class CreateNewApp extends BaseCommand {
     }
 
     const detectedPackageManager = detectPackageManager()
-    if (detectedPackageManager) {
-      pkgJson.packageManager = `${detectedPackageManager.name}@${detectedPackageManager.version}`
-      dirty = true
-    }
+    const detectedVersion =
+      detectedPackageManager?.name === this.packageManager
+        ? detectedPackageManager.version
+        : undefined
+
+    pkgJson.packageManager = detectedVersion
+      ? `${this.packageManager}@${detectedVersion}`
+      : this.packageManager
+
+    dirty = true
 
     if (dirty) {
       await writeFile(pkgJsonPath, JSON.stringify(pkgJson, null, 2))

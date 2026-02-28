@@ -23,25 +23,31 @@ export const templates = [
   {
     name: 'Hypermedia app',
     alias: 'hypermedia',
-    hint: 'A fullstack application using server-side templates',
+    hint: 'A full-stack app using server-side templates',
     source: 'github:adonisjs/starter-kits/hypermedia',
   },
   {
     name: 'React app (using Inertia)',
     alias: 'react',
-    hint: 'A fullstack React application with E2E type-safety',
+    hint: 'A full-stack React app with end-to-end type safety',
     source: 'github:adonisjs/starter-kits/inertia-react',
   },
   {
     name: 'Vue app (using Inertia)',
     alias: 'vue',
-    hint: 'A fullstack Vue application with E2E type-safety',
+    hint: 'A full-stack Vue app with end-to-end type safety',
     source: 'github:adonisjs/starter-kits/inertia-vue',
   },
   {
-    name: 'API (monorepo)',
+    name: 'API',
     alias: 'api',
-    hint: 'Type-safe REST API with dual authentication',
+    hint: 'A type-safe REST API with session and access token auth',
     source: 'github:adonisjs/starter-kits/api',
+  },
+  {
+    name: 'API (monorepo)',
+    alias: 'api-monorepo',
+    hint: 'A monorepo setup with a type-safe REST API',
+    source: 'github:adonisjs/starter-kits/api-monorepo',
   },
 ]

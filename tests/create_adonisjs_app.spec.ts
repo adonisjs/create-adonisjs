@@ -194,7 +194,7 @@ test.group('Create new app', (group) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
       '--skip-migrations',
-      '--kit="github:adonisjs/starter-kits/api"',
+      '--kit="github:adonisjs/starter-kits/api-monorepo"',
     ])
 
     command.verbose = VERBOSE
@@ -221,7 +221,7 @@ test.group('Create new app', (group) => {
       join(fs.basePath, 'foo'),
       '--pkg="yarn"',
       '--skip-migrations',
-      '--kit="github:adonisjs/starter-kits/api"',
+      '--kit="github:adonisjs/starter-kits/api-monorepo"',
     ])
 
     command.verbose = VERBOSE
@@ -239,7 +239,7 @@ test.group('Create new app', (group) => {
       join(fs.basePath, 'foo'),
       '--pkg="npm"',
       '--skip-migrations',
-      '--kit="github:adonisjs/starter-kits/api"',
+      '--kit="github:adonisjs/starter-kits/api-monorepo"',
     ])
 
     command.verbose = VERBOSE
@@ -254,7 +254,7 @@ test.group('Create new app', (group) => {
       join(fs.basePath, 'foo'),
       '--pkg="npm"',
       '--skip-migrations',
-      '--kit="github:adonisjs/starter-kits/api"',
+      '--kit="github:adonisjs/starter-kits/api-monorepo"',
     ])
 
     command.verbose = VERBOSE

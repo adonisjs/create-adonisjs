@@ -138,22 +138,30 @@ export class CreateNewApp extends BaseCommand {
   }
 
   /**
-   * Adapts the downloaded starter kit for the detected package manager.
+   * Adapts the downloaded starter kit for the selected package manager.
    * - For non-pnpm package managers: removes pnpm-workspace.yaml
+   * - For non-yarn package managers: removes .yarnrc.yml
    * - For non-monorepo starter kits: no further changes are needed
    * - For pnpm monorepos: removes the workspaces field from package.json
    *   since pnpm uses pnpm-workspace.yaml for workspace configuration
    * - For monorepos: sets the packageManager field in package.json to the
-   *   detected package manager name and version
+   *   selected package manager, using detected version when available
    */
   async #adaptForPackageManager() {
     const pkgJsonPath = join(this.destination, 'package.json')
     const pkgJson = await readFile(pkgJsonPath, 'utf-8').then(JSON.parse)
     const pnpmWorkspacePath = join(this.destination, 'pnpm-workspace.yaml')
+    const yarnFilePath = join(this.destination, '.yarnrc.yml')
 
     if (this.packageManager !== 'pnpm') {
       try {
         await unlink(pnpmWorkspacePath)
+      } catch {}
+    }
+
+    if (this.packageManager !== 'yarn') {
+      try {
+        await unlink(yarnFilePath)
       } catch {}
     }
 

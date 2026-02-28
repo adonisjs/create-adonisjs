@@ -208,6 +208,32 @@ test.group('Create new app', (group) => {
     assert.notProperty(pkgJson, 'workspaces')
   })
 
+  test('keep .yarnrc.yml and workspaces in package.json when using yarn', async ({
+    assert,
+    fs,
+    cleanup,
+  }) => {
+    process.env.npm_config_user_agent = 'npm/11.0.0 node/v15.0.0 darwin x64'
+    cleanup(() => {
+      delete process.env.npm_config_user_agent
+    })
+    const command = await kernel.create(CreateNewApp, [
+      join(fs.basePath, 'foo'),
+      '--pkg="yarn"',
+      '--skip-migrations',
+      '--kit="github:adonisjs/starter-kits/api"',
+    ])
+
+    command.verbose = VERBOSE
+    await command.exec()
+
+    await assert.fileExists('foo/.yarnrc.yml')
+
+    const pkgJson = JSON.parse(await fs.contents('foo/package.json'))
+    assert.include(pkgJson.packageManager, 'yarn')
+    assert.property(pkgJson, 'workspaces')
+  })
+
   test('remove pnpm-workspace.yaml when not using pnpm', async ({ assert, fs }) => {
     const command = await kernel.create(CreateNewApp, [
       join(fs.basePath, 'foo'),
@@ -220,6 +246,21 @@ test.group('Create new app', (group) => {
     await command.exec()
 
     await assert.fileNotExists('foo/pnpm-workspace.yaml')
+    await assert.fileContains('foo/package.json', '"workspaces"')
+  })
+
+  test('remove .yarnrc.yml when not using yarn', async ({ assert, fs }) => {
+    const command = await kernel.create(CreateNewApp, [
+      join(fs.basePath, 'foo'),
+      '--pkg="npm"',
+      '--skip-migrations',
+      '--kit="github:adonisjs/starter-kits/api"',
+    ])
+
+    command.verbose = VERBOSE
+    await command.exec()
+
+    await assert.fileNotExists('foo/.yarnrc.yml')
     await assert.fileContains('foo/package.json', '"workspaces"')
   })
 

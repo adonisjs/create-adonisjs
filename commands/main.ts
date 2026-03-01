@@ -412,7 +412,7 @@ export class CreateNewApp extends BaseCommand {
    * await this.#migrateDatabase()
    */
   async #migrateDatabase() {
-    await mkdir(join(this.backendSourceDir, 'tmp'))
+    await mkdir(join(this.backendSourceDir, 'tmp'), { recursive: true })
     await this.#runBashCommand(this.backendSourceDir, 'node', ['ace', 'migration:run'])
   }
 

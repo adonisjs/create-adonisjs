@@ -9,7 +9,7 @@
 
 // @ts-expect-error
 import { whichPMRuns } from 'which-pm-runs'
-import { cwd } from 'node:process'
+import { cwd, stdin } from 'node:process'
 import { existsSync } from 'node:fs'
 import gradient from 'gradient-string'
 import { downloadTemplate } from 'giget'
@@ -261,18 +261,43 @@ export class CreateNewApp extends BaseCommand {
   }
 
   /**
-   * Prompts the user to specify a destination directory if one was not provided
-   * as a command argument. Converts relative paths to absolute paths using the
-   * current working directory.
-   *
-   * Sets the `destination` property to the absolute path where the project will be created.
-   *
-   * @example
-   * await this.#promptForDestination()
-   * console.log('Creating project at:', this.destination)
+   * Displays AI-friendly instructions and exits when running in a
+   * non-interactive environment (no TTY) without the required flags.
    */
+  #exitWithNonInteractiveError(): never {
+    const kitOptions = templates.map((t) => `  - "${t.alias}": ${t.hint}`).join('\n')
+
+    this.logger.error(
+      [
+        `Interactive prompts are not supported in non-interactive environments.`,
+        ``,
+        `To create a new AdonisJS application, you must provide the destination directory and the starter kit as command-line arguments.`,
+        ``,
+        `Ask the user which starter kit they want to use. The available options are:`,
+        kitOptions,
+        ``,
+        `Also ask the user which package manager they want to use. The available options are: npm, yarn, pnpm.`,
+        ``,
+        `Once you have the user's preferences, run the command with the following format:`,
+        ``,
+        `  npm init adonisjs@latest -- <destination> --kit="<kit>" --pkg="<package_manager>"`,
+        ``,
+        `For example:`,
+        ``,
+        `  npm init adonisjs@latest -- my-app --kit="react" --pkg="npm"`,
+      ].join('\n')
+    )
+
+    this.exitCode = 1
+    throw new Error('Non-interactive environment detected')
+  }
+
   async #promptForDestination() {
     if (!this.destination) {
+      if (!stdin.isTTY) {
+        this.#exitWithNonInteractiveError()
+      }
+
       this.destination = await this.prompt.ask('Where should we create your new project?', {
         default: './adonisjs-app',
       })
@@ -297,6 +322,10 @@ export class CreateNewApp extends BaseCommand {
    */
   async #promptForStarterKit() {
     if (!this.kit) {
+      if (!stdin.isTTY) {
+        this.#exitWithNonInteractiveError()
+      }
+
       /**
        * Display prompt when "kit" flag is not used.
        */

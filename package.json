@@ -44,25 +44,24 @@
     "@japa/file-system": "^3.0.0",
     "@japa/runner": "^5.3.0",
     "@poppinss/ts-exec": "^1.4.4",
-    "@release-it/conventional-changelog": "^10.0.5",
+    "@release-it/conventional-changelog": "^10.0.6",
     "@types/gradient-string": "^1.1.6",
-    "@types/node": "^25.3.0",
-    "@types/which-pm-runs": "^1.0.2",
+    "@types/node": "^25.5.0",
     "c8": "^11.0.0",
     "cross-env": "^10.1.0",
     "del-cli": "^7.0.0",
-    "eslint": "^10.0.2",
+    "eslint": "^10.1.0",
     "prettier": "^3.8.1",
     "release-it": "19.2.4",
     "tsup": "^8.5.1",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.2"
   },
   "dependencies": {
-    "@adonisjs/ace": "^14.0.1",
+    "@adonisjs/ace": "^14.1.0",
     "execa": "^9.6.1",
-    "giget": "^3.1.2",
+    "giget": "^3.2.0",
     "gradient-string": "^3.0.0",
-    "which-pm-runs": "^1.1.0"
+    "which-pm-runs": "^2.0.0"
   },
   "homepage": "https://github.com/adonisjs/create-adonisjs#readme",
   "repository": {

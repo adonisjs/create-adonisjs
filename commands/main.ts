@@ -7,12 +7,13 @@
  * file that was distributed with this source code.
  */
 
+// @ts-expect-error
+import { whichPMRuns } from 'which-pm-runs'
 import { cwd } from 'node:process'
 import { existsSync } from 'node:fs'
 import gradient from 'gradient-string'
 import { downloadTemplate } from 'giget'
 import { type Options, execa } from 'execa'
-import detectPackageManager from 'which-pm-runs'
 import { BaseCommand, args, flags } from '@adonisjs/ace'
 import { basename, isAbsolute, join, relative } from 'node:path'
 import { copyFile, mkdir, readFile, unlink, writeFile } from 'node:fs/promises'
@@ -175,7 +176,7 @@ export class CreateNewApp extends BaseCommand {
       dirty = true
     }
 
-    const detectedPackageManager = detectPackageManager()
+    const detectedPackageManager = whichPMRuns()
     const detectedVersion =
       detectedPackageManager?.name === this.packageManager
         ? detectedPackageManager.version
@@ -432,7 +433,7 @@ export class CreateNewApp extends BaseCommand {
    * await command.run()
    */
   async run() {
-    this.packageManager = this.packageManager || detectPackageManager()?.name || 'npm'
+    this.packageManager = this.packageManager || whichPMRuns()?.name || 'npm'
 
     /**
      * Print ASCII art
@@ -496,7 +497,7 @@ export class CreateNewApp extends BaseCommand {
           await this.#copyEnvExampleFile()
           await this.#generateFreshAppKey()
           return 'Application ready'
-        } catch (error) {
+        } catch (error: any) {
           if (this.verbose) {
             this.logger.fatal(error)
             return task.error('Unable to prepare application')
@@ -508,7 +509,7 @@ export class CreateNewApp extends BaseCommand {
         try {
           await this.#migrateDatabase()
           return 'Database migrated'
-        } catch (error) {
+        } catch (error: any) {
           if (this.verbose) {
             this.logger.fatal(error)
             return task.error('Unable to migrate database')

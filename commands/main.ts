@@ -252,7 +252,7 @@ export class CreateNewApp extends BaseCommand {
     this.ui
       .instructions()
       .heading('Your AdonisJS project has been created successfully!')
-      .add(this.colors.cyan('cd ' + relative(cwd(), this.destination)))
+      .add(this.colors.cyan('cd ' + (relative(cwd(), this.destination) || '.')))
       .add(this.colors.cyan(`${this.packageManager} run dev`))
       .add(this.colors.cyan('Open http://localhost:3333'))
       .add('')

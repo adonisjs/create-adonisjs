@@ -58,6 +58,7 @@
   },
   "dependencies": {
     "@adonisjs/ace": "^14.1.0",
+    "@poppinss/utils": "^7.0.1",
     "execa": "^9.6.1",
     "giget": "^3.2.0",
     "gradient-string": "^3.0.0",

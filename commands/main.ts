@@ -9,11 +9,12 @@
 
 // @ts-expect-error
 import { whichPMRuns } from 'which-pm-runs'
-import { cwd, stdin } from 'node:process'
+import { cwd } from 'node:process'
 import { existsSync } from 'node:fs'
 import gradient from 'gradient-string'
 import { downloadTemplate } from 'giget'
 import { type Options, execa } from 'execa'
+import { isRunningInAIAgent } from '@poppinss/utils'
 import { BaseCommand, args, flags } from '@adonisjs/ace'
 import { basename, isAbsolute, join, relative } from 'node:path'
 import { copyFile, mkdir, readFile, unlink, writeFile } from 'node:fs/promises'
@@ -261,8 +262,8 @@ export class CreateNewApp extends BaseCommand {
   }
 
   /**
-   * Displays AI-friendly instructions and exits when running in a
-   * non-interactive environment (no TTY) without the required flags.
+   * Displays AI-friendly instructions and exit when running inside
+   * an AI agent sandbox without the required flags.
    */
   #exitWithNonInteractiveError(): never {
     const kitOptions = templates.map((t) => `  - "${t.alias}": ${t.hint}`).join('\n')
@@ -294,7 +295,7 @@ export class CreateNewApp extends BaseCommand {
 
   async #promptForDestination() {
     if (!this.destination) {
-      if (!stdin.isTTY) {
+      if (isRunningInAIAgent()) {
         this.#exitWithNonInteractiveError()
       }
 
@@ -322,7 +323,7 @@ export class CreateNewApp extends BaseCommand {
    */
   async #promptForStarterKit() {
     if (!this.kit) {
-      if (!stdin.isTTY) {
+      if (isRunningInAIAgent()) {
         this.#exitWithNonInteractiveError()
       }
 
